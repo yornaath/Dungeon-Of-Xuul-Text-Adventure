@@ -11,21 +11,21 @@ import Data.List (List(..), foldl, (:))
 import Data.Maps (dungeonOfXul)
 import Data.Maybe (Maybe(..))
 import Data.Role (Role(..))
-import Data.Stats (Agility(..), Stats, mkStats)
+import Data.Stats (Stats, mkStats)
 import Data.String (toLower)
 import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Game.Game (Game, liftGame)
+import Game.Game (Game)
 import Game.GameState (CreatingCharacterState, GameState(..))
 import Lib.AffReadline (question)
-import Static.Text (characterCreationHeader)
+import Static.Text as StaticText
 
 characterCreation :: CreatingCharacterState -> Array String -> Game GameState
 characterCreation state input = do
-  log characterCreationHeader
+  log StaticText.characterCreationHeader
   creationform state
   
 
@@ -35,6 +35,7 @@ creationform state = do
   { interface } <- ask
 
   name <- liftAff $ interface # question "Character name: "
+
   role <- chooseRole state
   stats <- allocateStats state
 
@@ -44,12 +45,13 @@ creationform state = do
   log $ show characterSheet
   log "----------------------------------- \n"
   
-  confirmed <- liftAff $ interface # question "Happy with this choice? (type yes to continue, no to start over) "
+  confirmed <- liftAff $ interface # question "Happy with this choice? (type yes to continue, no to start over): "
 
   if (toLower confirmed) == "y" || (toLower confirmed) == "yes" then 
     pure (Playing { character: characterSheet, location: dungeonOfXul })
   else
     creationform state
+
 
 chooseRole :: CreatingCharacterState -> Game Role
 chooseRole state = do
@@ -62,6 +64,7 @@ chooseRole state = do
     _ -> do
       log (roleInput <> " is not a recognized class.")
       chooseRole state
+
 
 allocateStats :: CreatingCharacterState -> Game Stats
 allocateStats state = do
