@@ -31,12 +31,12 @@ instance encodeJsonCharacterSheet :: EncodeJson CharacterSheet where
 instance decodeJsonCharacterSheet :: DecodeJson CharacterSheet where
   decodeJson a = genericDecodeJson a
 
-mkCharacterSheet :: String -> Role -> Int -> Int -> Int -> Int -> Int -> Int -> CharacterSheet
-mkCharacterSheet name role agi str end wis int xp = CharacterSheet {
+mkCharacterSheet :: String -> Role -> Stats -> Experience -> CharacterSheet
+mkCharacterSheet name role stats xp = CharacterSheet {
   name,
   role,
-  stats : mkStats agi str end wis int,
-  xp: Experience xp
+  stats,
+  xp
 }
 
 maxhp :: CharacterSheet -> Int

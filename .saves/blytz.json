@@ -1,0 +1,87 @@
+{
+  "values": [
+    {
+      "location": {
+        "values": [
+          {
+            "name": "Dungeon of Xul",
+            "exits": [
+              {
+                "values": [
+                  {
+                    "name": "crack",
+                    "location": {
+                      "values": [
+                        {
+                          "name": "Dungeon Entrance",
+                          "exits": [],
+                          "description": "You are in a dark and dimly lit cave entrance."
+                        }
+                      ],
+                      "tag": "Location"
+                    },
+                    "description": "There is a crack in the wall, you could possibly squeeze through it."
+                  }
+                ],
+                "tag": "Exit"
+              }
+            ],
+            "description": "You are standing in front of a towering cliff."
+          }
+        ],
+        "tag": "Location"
+      },
+      "character": {
+        "values": [
+          {
+            "xp": {
+              "values": [
+                0
+              ],
+              "tag": "Experience"
+            },
+            "stats": {
+              "wis": {
+                "values": [
+                  2
+                ],
+                "tag": "Wisdom"
+              },
+              "str": {
+                "values": [
+                  18
+                ],
+                "tag": "Strength"
+              },
+              "int": {
+                "values": [
+                  2
+                ],
+                "tag": "Intelligence"
+              },
+              "end": {
+                "values": [
+                  15
+                ],
+                "tag": "Endurance"
+              },
+              "agi": {
+                "values": [
+                  12
+                ],
+                "tag": "Agility"
+              }
+            },
+            "role": {
+              "values": [],
+              "tag": "Warrior"
+            },
+            "name": "Blytz"
+          }
+        ],
+        "tag": "CharacterSheet"
+      }
+    }
+  ],
+  "tag": "Playing"
+}
