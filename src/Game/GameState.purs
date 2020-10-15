@@ -31,7 +31,8 @@ showCharacterCreationCompletionState { name, role } =
   "Role: " <> (maybe " required" (\r -> show r <> " ✓") role)
 
 data GameState = 
-    Playing PlayingState
+    MainMenu
+  | Playing PlayingState
   | CreatingCharacter CreatingCharacterState
 
 derive instance genericGameState :: Generic GameState _

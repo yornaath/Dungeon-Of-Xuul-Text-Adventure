@@ -6,12 +6,12 @@ import Data.Argonaut.Decode (class DecodeJson)
 import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
-import Data.Experience (Experience(..), Level(..), levelof)
+import Data.Experience (Experience, Level(..), levelof)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Int (floor, toNumber)
 import Data.Role (Role)
-import Data.Stats (Endurance(..), Stats, mkStats)
+import Data.Stats (Endurance(..), Stats)
 
 data CharacterSheet = CharacterSheet 
   { name :: String,

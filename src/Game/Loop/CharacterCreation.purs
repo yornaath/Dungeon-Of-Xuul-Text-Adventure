@@ -26,7 +26,12 @@ import Static.Text as StaticText
 characterCreation :: CreatingCharacterState -> Array String -> Game GameState
 characterCreation state input = do
   log StaticText.characterCreationHeader
-  creationform state
+  case input of 
+    [":exit"] -> do
+      pure (MainMenu)
+    _ -> do
+      creationform state
+  
   
 
 creationform :: CreatingCharacterState -> Game GameState

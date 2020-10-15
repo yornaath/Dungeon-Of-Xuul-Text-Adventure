@@ -13,7 +13,7 @@ import Game.Game (runGame)
 import Game.GameEnvironment (GameEnvironment)
 import Game.GameState (GameState(..))
 import Game.Loop.Root (game)
-import Lib.AffReadline (question)
+import Lib.AffReadline (command, question)
 import Node.ReadLine as RL
 import Static.Text as StaticText
 
@@ -27,22 +27,15 @@ main = do
   let 
 
     initialState :: GameState
-    initialState = (CreatingCharacter { name: Nothing, role: Nothing })
+    initialState = (MainMenu)
 
     env :: GameEnvironment
     env = { interface }
 
     gameLoopRunner :: GameState -> Aff Unit
     gameLoopRunner currentState = do
-
-      line <- interface # question "> "
-
-      let 
-        command :: Array String
-        command = (split (wrap " ")) line
-
+      command <- command interface "> "
       newState <- runGame env (game currentState command)
-
       gameLoopRunner newState
           
 

@@ -2,12 +2,22 @@ module Game.Loop.Playing where
   
 import Prelude
 
+import Effect.Class.Console (log, logShow)
 import Game.Game (Game)
 import Game.GameState (GameState(..), PlayingState)
 
 playing :: PlayingState -> Array String -> Game GameState
 playing state input = do
-  pure (Playing state)
+  case input of 
+    [":exit"] -> do
+      pure (MainMenu)
+    [":c"] -> do 
+      log "Character: "
+      logShow state.character
+      pure (Playing state)
+    _ -> do
+      log "Game started."
+      pure (Playing state)
     
 -- game ["look"] = do
 --   GameState state <- get

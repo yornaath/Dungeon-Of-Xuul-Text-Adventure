@@ -29,7 +29,6 @@ loadGame save = makeAff \cb -> do
           case gameStateFromJson json of
             Left error -> do logShow error
             Right gameState -> do
-              log ("loaded game: " <> save)
               cb (Right gameState)
   mempty
 
