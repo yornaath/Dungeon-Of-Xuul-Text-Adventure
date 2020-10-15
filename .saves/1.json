@@ -1,0 +1,17 @@
+{
+  "values": [
+    {
+      "location": {
+        "values": [
+          {
+            "name": "Dungeon Entrance",
+            "exits": [],
+            "description": "You are in a dark and dimly lit cave entrance."
+          }
+        ],
+        "tag": "Location"
+      }
+    }
+  ],
+  "tag": "GameState"
+}
