@@ -2,14 +2,23 @@ module Game.Loop.Playing where
   
 import Prelude
 
-import Effect.Aff (Aff)
-import Game.Game (Game(..))
+import Effect.Aff.Class (liftAff)
+import Game.Game (Game)
 import Game.GameState (GameState(..), PlayingState)
+import Game.Saving (loadGame, saveGame)
 
 playing :: PlayingState -> Array String -> Game GameState
-playing state input = do 
-  pure (Playing state)
-
+playing state input = do
+  case input of
+    ["load", save] -> do 
+      loadedSaveState <- liftAff $ loadGame save
+      pure loadedSaveState
+    ["save", save] -> do
+      saveState <- liftAff $ saveGame save (Playing state)
+      pure saveState
+    _ -> do
+      pure (Playing state)
+    
 -- game ["look"] = do
 --   GameState state <- get
 --   let (Location currentLocation) = state.location

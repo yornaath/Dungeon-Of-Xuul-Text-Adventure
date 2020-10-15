@@ -2,15 +2,6 @@ module Game.Loop.Root where
   
 import Prelude
 
-import Control.Apply (lift2)
-import Control.Monad.RWS (ask, get, lift)
-import Data.Either (Either(..))
-import Effect (Effect)
-import Effect.Aff (Aff, launchAff_, makeAff)
-import Effect.Aff.AVar (put, read, take)
-import Effect.Aff.Class (liftAff)
-import Effect.Class (liftEffect)
-import Effect.Class.Console (logShow)
 import Game.Game (Game, liftGame)
 import Game.GameState (GameState(..))
 import Game.Loop.CharacterCreation (characterCreation)
