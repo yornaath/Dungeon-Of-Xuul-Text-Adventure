@@ -14,6 +14,10 @@ import Lib.AffReadline (command, question)
 mainMenu :: GameState -> Array String -> Game GameState
 mainMenu state input = do
   case input of
+    ["help"] -> do
+      log ":load savename -- Load a savegame by its name"
+      log ":start -- Start a new game"
+      pure state
     [":load", save] -> do 
       loadedSaveState <- liftAff $ loadGame save
       log $ "loaded game: " <> save

@@ -14,7 +14,12 @@ import Static.Text as Static.Text
 
 playing :: PlayingState -> Array String -> Game GameState
 playing state input = do
-  case input of 
+  case input of
+    ["help"] -> do
+      log ":save savename -- Save a game by its name"
+      log ":exit -- Exit to main menu"
+      log ":c -- Inspect character"
+      pure (Playing state)
     [":exit"] -> do
       pure (MainMenu)
     [":save", save] -> do
