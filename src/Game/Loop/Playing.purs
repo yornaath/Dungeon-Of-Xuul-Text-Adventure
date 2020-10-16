@@ -12,7 +12,6 @@ playing state input = do
     [":exit"] -> do
       pure (MainMenu)
     [":c"] -> do 
-      log "Character: "
       logShow state.character
       pure (Playing state)
     _ -> do
