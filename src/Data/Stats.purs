@@ -6,7 +6,10 @@ import Data.Argonaut.Decode (class DecodeJson)
 import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
+import Data.Foldable (foldl)
 import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
+import Data.List (List(..))
 import Data.Newtype (class Newtype)
 
 newtype Agility = Agility Int
@@ -57,6 +60,11 @@ data Stats = Stats
     int :: Intelligence
   }
 
+derive instance genericStats :: Generic Stats _
+
+instance showStats :: Show Stats where
+  show = genericShow
+
 instance semigroupStats :: Semigroup Stats where
   append (Stats a) (Stats b) = Stats { agi, str, end, wis, int } where
     agi = a.agi + b.agi
@@ -67,8 +75,6 @@ instance semigroupStats :: Semigroup Stats where
 
 instance monoidStats :: Monoid Stats where
   mempty = emptyStats
-
-derive instance genericStats :: Generic Stats _
 
 instance encodeJsonStats :: EncodeJson Stats where
   encodeJson a = genericEncodeJson a
@@ -93,3 +99,6 @@ emptyStats = Stats {
   wis: Wisdom 0,
   int: Intelligence 0
 }
+
+total :: List Stats -> Stats
+total statsList = foldl (<>) emptyStats statsList
