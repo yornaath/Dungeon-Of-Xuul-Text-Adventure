@@ -2,20 +2,32 @@ module Game.Loop.Playing where
   
 import Prelude
 
+import Control.Monad.Reader (ask)
+import Data.Character (CharacterSheet(..))
+import Effect.Aff.Class (liftAff)
 import Effect.Class.Console (log, logShow)
 import Game.Game (Game)
 import Game.GameState (GameState(..), PlayingState)
+import Game.Saving (saveGame)
+import Lib.AffReadline (command)
+import Static.Text as Static.Text
 
 playing :: PlayingState -> Array String -> Game GameState
 playing state input = do
   case input of 
     [":exit"] -> do
       pure (MainMenu)
+    [":save", save] -> do
+      saved <- liftAff $ saveGame save (Playing state)
+      pure (Playing state)
     [":c"] -> do 
       logShow state.character
       pure (Playing state)
+    [] -> do
+      { interface } <- ask
+      input' <- liftAff $ command interface "> "
+      playing state input'
     _ -> do
-      log "Game started."
       pure (Playing state)
     
 -- game ["look"] = do

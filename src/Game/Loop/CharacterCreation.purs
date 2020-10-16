@@ -32,8 +32,6 @@ characterCreation state input = do
     _ -> do
       creationform state
   
-  
-
 creationform :: CreatingCharacterState -> Game GameState
 creationform state = do
 

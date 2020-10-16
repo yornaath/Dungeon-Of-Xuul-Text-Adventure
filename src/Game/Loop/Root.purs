@@ -7,21 +7,22 @@ import Effect.Class.Console (log)
 import Game.Game (Game, liftGame)
 import Game.GameState (GameState(..))
 import Game.Loop.CharacterCreation (characterCreation)
-import Game.Loop.Playing (playing)
 import Game.Loop.MainMenu (mainMenu)
+import Game.Loop.Playing (playing)
 import Game.Saving (loadGame, saveGame)
+import Lib.AffReadline (command)
 
-game :: GameState -> Array String -> Game GameState
-game state input = do
+game :: GameState -> Game GameState
+game state = do
   case state of
     (MainMenu) -> do
-      newState <- liftGame $ mainMenu state input
+      newState <- liftGame $ mainMenu state []
       pure newState
     (CreatingCharacter state') -> do 
-      newState <- liftGame $ characterCreation state' input
+      newState <- liftGame $ characterCreation state' []
       pure newState
     (Playing state') -> do
-      newState <- liftGame $ playing state' input
+      newState <- liftGame $ playing state' []
       pure newState
   
       

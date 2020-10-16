@@ -22,7 +22,7 @@ main = do
 
   interface <- liftEffect $ RL.createConsoleInterface RL.noCompletion
 
-  log StaticText.intro
+  log StaticText.banner
 
   let 
 
@@ -34,8 +34,7 @@ main = do
 
     gameLoopRunner :: GameState -> Aff Unit
     gameLoopRunner currentState = do
-      command <- command interface "> "
-      newState <- runGame env (game currentState command)
+      newState <- runGame env (game currentState)
       gameLoopRunner newState
           
 
