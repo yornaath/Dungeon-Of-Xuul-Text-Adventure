@@ -9,7 +9,7 @@ import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Foldable (foldl)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.List (List(..))
+import Data.List (List)
 import Data.Newtype (class Newtype)
 
 newtype Agility = Agility Int
