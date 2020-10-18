@@ -16,7 +16,6 @@ import Game.Loop.Playing.PlayingState (PlayingState)
 import Game.Saving (saveGame)
 import Lib.AffReadline (command)
 
-
 playing :: PlayingState -> Array String -> Engine GameState
 playing state input = do
   case input of
@@ -34,7 +33,7 @@ playing state input = do
       logShow state.character
       pure (Playing state)
     ["talk"] -> do
-        dialogue state testDialogue 1
+      dialogue state testDialogue 1
     [] -> do
       { interface } <- ask
       input' <- liftAff $ command interface "> "

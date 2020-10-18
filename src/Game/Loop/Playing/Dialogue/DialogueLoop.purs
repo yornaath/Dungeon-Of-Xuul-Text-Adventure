@@ -2,9 +2,12 @@ module Game.Loop.Playing.Dialogue.DialogueLoop where
 
 import Prelude
 
+import Ansi.Codes (Color(..))
+import Ansi.Output (foreground, italic, withGraphics)
 import Control.Monad.Reader (ask)
+import Data.Array (foldl, mapWithIndex)
 import Data.Array as A
-import Data.Dialogue (Dialogue, Reply, ChoicePoint, renderChoicePoint)
+import Data.Dialogue (Dialogue, Reply, ChoicePoint)
 import Data.Int (fromString)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -14,25 +17,23 @@ import Effect.Class.Console (log)
 import Game.Engine (Engine)
 import Game.GameState (GameState(..))
 import Game.Loop.Playing.PlayingState (PlayingState)
-import Lib.AffReadline (command, question)
+import Lib.AffReadline (question)
 
 dialogue :: PlayingState -> Dialogue -> Int -> Engine GameState
 dialogue state dialogue' index = do
-  let start = M.lookup index dialogue'
-  case start of 
+  case M.lookup index dialogue' of 
     (Just choicePoint) -> do
       log $ renderChoicePoint choicePoint
       reply <- askForReply choicePoint
-      log $ "You: “" <> reply.text <> "”\n"
+      log $ withGraphics (foreground Blue) $ "\nYou: “" <> reply.text <> "”"
       case reply.next of 
         (Just nextIndex) -> do 
           dialogue state dialogue' nextIndex
         (Nothing) -> do
-          log "dialogue ended\n"
+          log $ withGraphics (italic <> foreground White) $ "dialogue ended\n"
           pure (Playing state)
     _ -> do
       pure (Playing state)
-
 
 askForReply :: ChoicePoint -> Engine Reply 
 askForReply (Tuple text replies) = do
@@ -49,4 +50,14 @@ askForReply (Tuple text replies) = do
           askForReply (Tuple text replies)
     _ -> do
       askForReply (Tuple text replies)
+
+renderChoicePoint :: ChoicePoint -> String
+renderChoicePoint (Tuple text replies) =
+  withGraphics (foreground Blue) $
+  "\n“" <> text <> "”\n\n" <> foldl (\acc reply -> acc <> renderReply reply) "" (mapWithIndex (\index reply -> (Tuple index reply)) replies)
+
+renderReply :: Tuple Int Reply -> String
+renderReply (Tuple index reply) =
+  withGraphics (foreground Yellow) $
+  (show (index + 1)) <> ". " <> reply.text <> "\n"
 
