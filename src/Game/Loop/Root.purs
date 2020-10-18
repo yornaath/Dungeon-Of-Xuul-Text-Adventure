@@ -2,27 +2,23 @@ module Game.Loop.Root where
   
 import Prelude
 
-import Effect.Aff.Class (liftAff)
-import Effect.Class.Console (log)
-import Game.Game (Game, liftGame)
+import Game.Engine (Engine)
 import Game.GameState (GameState(..))
 import Game.Loop.CharacterCreation (characterCreation)
 import Game.Loop.MainMenu (mainMenu)
-import Game.Loop.Playing (playing)
-import Game.Saving (loadGame, saveGame)
-import Lib.AffReadline (command)
+import Game.Loop.Playing.PlayingLoop (playing)
 
-game :: GameState -> Game GameState
+game :: GameState -> Engine GameState
 game state = do
   case state of
     (MainMenu) -> do
-      newState <- liftGame $ mainMenu state []
+      newState <- mainMenu state []
       pure newState
     (CreatingCharacter state') -> do 
-      newState <- liftGame $ characterCreation state' []
+      newState <- characterCreation state' []
       pure newState
     (Playing state') -> do
-      newState <- liftGame $ playing state' []
+      newState <- playing state' []
       pure newState
   
       

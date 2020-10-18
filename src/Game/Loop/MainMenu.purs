@@ -6,12 +6,12 @@ import Control.Monad.Reader (ask)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (liftAff)
 import Effect.Class.Console (log)
-import Game.Game (Game, liftGame)
+import Game.Engine (Engine)
 import Game.GameState (GameState(..))
 import Game.Saving (loadGame)
-import Lib.AffReadline (command, question)
+import Lib.AffReadline (command)
 
-mainMenu :: GameState -> Array String -> Game GameState
+mainMenu :: GameState -> Array String -> Engine GameState
 mainMenu state input = do
   case input of
     ["help"] -> do

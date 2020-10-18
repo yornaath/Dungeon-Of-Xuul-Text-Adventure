@@ -18,12 +18,14 @@ import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Game.Game (Game)
-import Game.GameState (CreatingCharacterState, GameState(..))
+import Game.Engine (Engine)
+import Game.GameState (GameState(..))
+import Game.Loop.Playing.PlayingLoop (startGame)
 import Lib.AffReadline (question)
 import Static.Text as StaticText
+import Game.Loop.CharacterCreation.CreatingCharacterState (CreatingCharacterState)
 
-characterCreation :: CreatingCharacterState -> Array String -> Game GameState
+characterCreation :: CreatingCharacterState -> Array String -> Engine GameState
 characterCreation state input = do
   log StaticText.characterCreationHeader
   case input of 
@@ -32,7 +34,7 @@ characterCreation state input = do
     _ -> do
       creationform state
   
-creationform :: CreatingCharacterState -> Game GameState
+creationform :: CreatingCharacterState -> Engine GameState
 creationform state = do
 
   { interface } <- ask
@@ -51,12 +53,12 @@ creationform state = do
   confirmed <- liftAff $ interface # question "Happy with this choice? (type yes to continue, no to start over): "
 
   if (toLower confirmed) == "y" || (toLower confirmed) == "yes" then 
-    pure (Playing { character: characterSheet, location: dungeonOfXul })
+    pure (Playing $ startGame characterSheet dungeonOfXul)
   else
     creationform state
 
 
-chooseRole :: CreatingCharacterState -> Game Role
+chooseRole :: CreatingCharacterState -> Engine Role
 chooseRole state = do
   { interface } <- ask
   roleInput <- liftAff $ interface # question "Choose a class(Warrior, Thief or Mage): "
@@ -69,7 +71,7 @@ chooseRole state = do
       chooseRole state
 
 
-allocateStats :: CreatingCharacterState -> Game Stats
+allocateStats :: CreatingCharacterState -> Engine Stats
 allocateStats state = do
   { interface } <- ask
   
@@ -94,7 +96,7 @@ allocateStats state = do
     pure (mkStats agi str end wis int)
 
 
-pickStat :: String -> Int -> (Game (Tuple Int Int))
+pickStat :: String -> Int -> (Engine (Tuple Int Int))
 pickStat statname total = do
   { interface } <- ask
   numString <- liftAff $ interface # question ("Choose " <> statname <> " (" <> show total <> "): ")

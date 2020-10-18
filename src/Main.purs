@@ -2,18 +2,14 @@ module Main where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
-import Data.Newtype (wrap)
-import Data.String (split)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Game.Game (runGame)
+import Game.Engine (runEngine)
 import Game.GameEnvironment (GameEnvironment)
 import Game.GameState (GameState(..))
 import Game.Loop.Root (game)
-import Lib.AffReadline (command, question)
 import Node.ReadLine as RL
 import Static.Text as StaticText
 
@@ -34,7 +30,7 @@ main = do
 
     gameLoopRunner :: GameState -> Aff Unit
     gameLoopRunner currentState = do
-      newState <- runGame env (game currentState)
+      newState <- runEngine env (game currentState)
       gameLoopRunner newState
           
 
