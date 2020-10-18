@@ -1,0 +1,69 @@
+{
+  "values": [
+    {
+      "turn": 0,
+      "location": {
+        "values": [
+          {
+            "name": "Dungeon of Xul",
+            "exits": [
+              {
+                "values": [
+                  {
+                    "name": "crack",
+                    "location": {
+                      "values": [
+                        {
+                          "name": "Dungeon Entrance",
+                          "exits": [],
+                          "description": "You are in a dark and dimly lit cave entrance."
+                        }
+                      ],
+                      "tag": "Location"
+                    },
+                    "description": "There is a crack in the wall, you could possibly squeeze through it."
+                  }
+                ],
+                "tag": "Exit"
+              }
+            ],
+            "description": "You are standing in front of a towering cliff."
+          }
+        ],
+        "tag": "Location"
+      },
+      "character": {
+        "values": [
+          {
+            "xp": {
+              "values": [
+                0
+              ],
+              "tag": "Experience"
+            },
+            "stats": {
+              "values": [
+                {
+                  "wis": 10,
+                  "str": 4,
+                  "int": 14,
+                  "end": 7,
+                  "agi": 4
+                }
+              ],
+              "tag": "Stats"
+            },
+            "role": {
+              "values": [],
+              "tag": "Mage"
+            },
+            "name": "Dia",
+            "hp": 100
+          }
+        ],
+        "tag": "CharacterSheet"
+      }
+    }
+  ],
+  "tag": "Playing"
+}

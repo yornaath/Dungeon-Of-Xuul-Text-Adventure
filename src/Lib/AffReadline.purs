@@ -12,8 +12,8 @@ import Effect.Class.Console (log)
 import Node.ReadLine (Interface)
 import Node.ReadLine as RL
 
-question :: String -> Interface -> Aff String
-question message interface = makeAff go
+question :: Interface -> String -> Aff String
+question interface message = makeAff go
   where
     -- go :: (Either Error a -> Effect Unit) -> Effect Canceler
     go runAffFunction = nonCanceler <$
@@ -22,7 +22,7 @@ question message interface = makeAff go
 
 command :: Interface -> String -> Aff (Array String)
 command interface prompt = do 
-  answer <- question prompt interface
+  answer <- question interface prompt
   let 
     command' :: Array String
     command' = (split (wrap " ")) answer

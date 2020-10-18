@@ -8,3 +8,10 @@ type PlayingState = {
   character :: CharacterSheet,
   location :: Location
 }
+
+startGame :: CharacterSheet -> Location -> PlayingState
+startGame character location = {
+  turn: 0,
+  character,
+  location
+}
