@@ -10,9 +10,11 @@ import Game.Engine (Engine)
 import Game.GameState (GameState(..))
 import Game.Saving (loadGame)
 import Lib.AffReadline (command)
+import Static.Text as StaticText
 
 mainMenu :: GameState -> Array String -> Engine GameState
 mainMenu state input = do
+  log StaticText.banner
   case input of
     ["help"] -> do
       log ":load savename -- Load a savegame by its name"
