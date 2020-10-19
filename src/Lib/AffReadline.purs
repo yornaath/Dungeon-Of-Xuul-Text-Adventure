@@ -23,10 +23,7 @@ question interface message = makeAff go
 command :: Interface -> String -> Aff (Array String)
 command interface prompt = do 
   answer <- question interface prompt
-  let 
-    command' :: Array String
-    command' = (split (wrap " ")) answer
-  pure command'
+  pure $ (split (wrap " ")) answer
 
 closeInterface :: Interface -> Effect Unit
 closeInterface interface = do

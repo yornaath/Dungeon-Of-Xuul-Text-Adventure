@@ -7,6 +7,7 @@ import Ansi.Output (foreground, italic, withGraphics)
 import Control.Monad.Reader (ask)
 import Data.Array (foldl, mapWithIndex)
 import Data.Array as A
+import Data.Character (CharacterSheet(..))
 import Data.Dialogue (Dialogue, Reply, ChoicePoint)
 import Data.Int (fromString)
 import Data.Map as M
@@ -21,16 +22,17 @@ import Lib.AffReadline (question)
 
 dialogue :: PlayingState -> Dialogue -> Int -> Engine GameState
 dialogue state dialogue' index = do
+  let (CharacterSheet {name}) = state.character
   case M.lookup index dialogue' of 
     (Just choicePoint) -> do
       log $ renderChoicePoint choicePoint
       reply <- askForReply choicePoint
-      log $ withGraphics (foreground Blue) $ "\nYou: “" <> reply.text <> "”"
+      log $ withGraphics (foreground Blue) $ "\n" <> name <> " “" <> reply.text <> "”"
       case reply.next of 
         (Just nextIndex) -> do 
-          dialogue state dialogue' nextIndex
+          dialogue (state { turn = state.turn + 1}) dialogue' nextIndex
         (Nothing) -> do
-          log $ withGraphics (italic <> foreground White) $ "dialogue ended\n"
+          log $ withGraphics (italic <> foreground White) $ "[dialogue ended]\n"
           pure (Playing state)
     _ -> do
       pure (Playing state)

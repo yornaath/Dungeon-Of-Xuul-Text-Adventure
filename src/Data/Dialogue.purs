@@ -1,14 +1,10 @@
 module Data.Dialogue where
 
-import Prelude
-
-import Data.Array (mapWithIndex)
-import Data.Foldable (foldl)
-import Data.Map as M
+import Data.Map (Map)
 import Data.Maybe (Maybe)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple)
 
-type Dialogue = M.Map Int ChoicePoint
+type Dialogue = Map Int ChoicePoint
 
 type ChoicePoint = (Tuple String (Array Reply))
 
