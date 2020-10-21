@@ -3,15 +3,13 @@ module Main where
 import Prelude
 
 import Components.Game (Action(..), gameComponent)
-import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Aff (Aff, forkAff, joinFiber, launchAff, launchAff_, makeAff)
-import Effect.Console as Console
+import Effect.Aff (Aff, forkAff)
 import Engine.Environment (Environment)
 import Game.Engine (runEngine)
 import Game.GameState (GameState(..))
 import Game.Loop.Root (gameLoop)
-import Halogen (liftAff, liftEffect)
+import Halogen (liftEffect)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)

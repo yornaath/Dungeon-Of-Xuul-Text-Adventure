@@ -50,10 +50,10 @@ instance engineEngineM :: EngineM Engine where
   prompt = do
     inputQueue <- asks _.input
     let 
-      takeNext = makeAff \cb -> do
+      takeNext = liftAff $ makeAff \cb -> do
         Q.once inputQueue \item -> do
           cb (Right item)
         mempty
-    nextLine <- liftAff takeNext
+    nextLine <- takeNext
     pure nextLine
 
