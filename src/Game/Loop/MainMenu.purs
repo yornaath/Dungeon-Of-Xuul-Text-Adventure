@@ -15,11 +15,15 @@ import Static.Text as StaticText
 mainMenu :: GameState -> Array String -> Engine GameState
 mainMenu state input = do
   log StaticText.banner
+  mainMenuChoices state input
+
+mainMenuChoices :: GameState -> Array String -> Engine GameState
+mainMenuChoices state input = do
   case input of
     ["help"] -> do
       log ":load savename -- Load a savegame by its name"
       log ":start -- Start a new game"
-      pure state
+      mainMenuChoices state []
     [":load", save] -> do 
       loadedSaveState <- liftAff $ loadGame save
       log $ "loaded game: " <> save
@@ -29,8 +33,8 @@ mainMenu state input = do
     [] -> do
       input' <- prompt
       let command = (split (wrap " ")) input'
-      mainMenu state command
+      mainMenuChoices state command
     _ -> do 
       log "I dont understand."
-      pure state
+      mainMenuChoices state []
 

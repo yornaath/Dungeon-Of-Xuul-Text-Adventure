@@ -2,17 +2,43 @@ module Engine.SaveGames where
 
 import Prelude
 
+import Data.Argonaut.Core (Json)
 import Data.Argonaut.Core as AC
-import Data.Argonaut.Encode (encodeJson)
+import Data.Argonaut.Decode (class DecodeJson, JsonDecodeError, decodeJson)
+import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
+import Data.Argonaut.Encode (class EncodeJson, encodeJson)
+import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Argonaut.Parser (jsonParser)
+import Data.DateTime.Instant (unInstant)
 import Data.Either (Either(..))
+import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff, makeAff)
+import Effect.Aff (Aff, Milliseconds(..), makeAff)
 import Effect.Class.Console (log, logShow)
-import Game.GameState (GameState, gameStateFromJson)
+import Effect.Now (now)
+import Game.GameState (GameState)
 import Web.HTML (window)
 import Web.HTML.Window (localStorage)
 import Web.Storage.Storage (getItem, setItem)
+
+newtype SaveGame = SaveGame {
+  gameState :: GameState,
+  saved :: Number
+}
+
+derive instance genericSaveGame:: Generic SaveGame _
+
+instance encodeJsonSaveGame :: EncodeJson SaveGame where
+  encodeJson a = genericEncodeJson a
+
+instance decodeJsonSaveGame :: DecodeJson SaveGame where
+  decodeJson a = genericDecodeJson a
+
+saveGameToJson :: SaveGame -> Json
+saveGameToJson = encodeJson
+
+saveGameFromJson :: Json -> Either JsonDecodeError SaveGame
+saveGameFromJson = decodeJson
 
 loadGame :: String -> Aff GameState
 loadGame save = makeAff \cb -> do
@@ -29,16 +55,18 @@ loadGame save = makeAff \cb -> do
           log ("error :" <> error)
           pure unit
         Right json -> do
-          case gameStateFromJson json of
+          case saveGameFromJson json of
             Left error -> do logShow error
-            Right gameState -> do
-              cb (Right gameState)
+            Right (SaveGame saveGame') -> do
+              cb (Right saveGame'.gameState)
   mempty
 
 saveGame :: String -> GameState -> Aff GameState
 saveGame save currentState = makeAff \cb -> do
-  let 
-    gameStateJson = encodeJson currentState
+  time <- now
+  let
+    (Milliseconds ms) = unInstant $ time
+    gameStateJson = saveGameToJson (SaveGame { gameState: currentState, saved: ms })
     gameStateString = AC.stringifyWithIndent 2 gameStateJson
   w <- window
   storage <- localStorage w
