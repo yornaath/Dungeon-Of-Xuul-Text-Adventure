@@ -19,12 +19,13 @@ main :: Effect Unit
 main = launchAff_ do
 
   input <- liftEffect $ Q.new
+  log <- liftEffect $ Q.new
   save <- loadGame "dia"
 
   let 
 
     env :: Environment
-    env = { input }
+    env = { input, log }
 
     gameLoopRunner :: GameState -> Aff Unit
     gameLoopRunner currentState = do

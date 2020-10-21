@@ -12,8 +12,21 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Web.UIEvent.KeyboardEvent (code)
 import Queue as Q
+import Web.UIEvent.KeyboardEvent (code)
+import Control.Monad.Rec.Class (forever)
+import Data.Maybe (Maybe(..))
+import Effect (Effect)
+import Effect.Aff (Milliseconds(..))
+import Effect.Aff as Aff
+import Effect.Aff.Class (class MonadAff)
+import Effect.Exception (error)
+import Halogen as H
+import Halogen.Aff as HA
+import Halogen.HTML as HH
+import Halogen.Query.EventSource (EventSource)
+import Halogen.Query.EventSource as EventSource
+import Halogen.VDom.Driver (runUI)
 
 type State = {
   currentInput :: String,
@@ -24,6 +37,7 @@ data Action a =
     Init
   | Noop
   | Turn GameState a
+  | Log String a
   | Return
   | Typing String
 
@@ -66,6 +80,9 @@ gameComponent environment initialGameState =
       pure unit
     Turn nextState a -> do
       H.modify_ _ { game = nextState }
+      pure unit
+    Log str a -> do
+      log  ("LOG: " <> str )
       pure unit
     Typing str -> do
       H.modify_ _ { currentInput = str }

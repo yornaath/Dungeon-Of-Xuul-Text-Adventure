@@ -3,13 +3,15 @@ module Main where
 import Prelude
 
 import Components.Game (Action(..), gameComponent)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..), delay, forkAff)
+import Effect.Aff (Aff, forkAff, joinFiber, launchAff, launchAff_, makeAff)
+import Effect.Console as Console
 import Engine.Environment (Environment)
 import Game.Engine (runEngine)
 import Game.GameState (GameState(..))
 import Game.Loop.Root (gameLoop)
-import Halogen (liftEffect)
+import Halogen (liftAff, liftEffect)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
@@ -20,11 +22,12 @@ main :: Effect Unit
 main = HA.runHalogenAff do
 
   input <- liftEffect $ Q.new
+  log <- liftEffect $ Q.new
 
   let
   
     environment :: Environment
-    environment = { input }
+    environment = { input, log }
 
     initialGameState :: GameState
     initialGameState = MainMenu
@@ -41,5 +44,5 @@ main = HA.runHalogenAff do
         _ <- halogenIO.query $ H.tell $ Turn newState
         gameLoopRunner newState
     gameLoopRunner initialState
-
+    
   pure unit

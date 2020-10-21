@@ -43,7 +43,8 @@ instance engineEngineM :: EngineM Engine where
   liftEngine = identity
 
   log str = do
-    liftEffect $ Console.log str
+    logQueue <- asks _.log
+    liftEffect $ Q.put logQueue str
     pure unit
 
   prompt = do
