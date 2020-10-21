@@ -4,12 +4,12 @@ import Prelude
 
 import Control.Monad.Reader (ask)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (wrap)
+import Data.String (split)
 import Effect.Aff.Class (liftAff)
-import Effect.Class.Console (log)
-import Game.Engine (Engine)
+import Engine.SaveGames (loadGame)
+import Game.Engine (Engine, prompt, log)
 import Game.GameState (GameState(..))
-import Game.Saving (loadGame)
-import Lib.AffReadline (command)
 import Static.Text as StaticText
 
 mainMenu :: GameState -> Array String -> Engine GameState
@@ -27,9 +27,9 @@ mainMenu state input = do
     [":start"] -> do
       pure (CreatingCharacter { name: Nothing, role: Nothing })
     [] -> do
-      { interface } <- ask
-      input' <- liftAff $ command interface "> "
-      mainMenu state input'
+      input' <- prompt
+      let command = (split (wrap " ")) input'
+      mainMenu state command
     _ -> do 
       log "I dont understand."
       pure state

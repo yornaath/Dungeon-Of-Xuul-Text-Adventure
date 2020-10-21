@@ -16,8 +16,10 @@ You can edit this file as you like.
   , "node-readline"
   , "ordered-collections"
   , "psci-support"
+  , "queue"
   , "random"
   , "yargs"
+  , "zeta"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

@@ -2,34 +2,44 @@ module Main where
 
 import Prelude
 
+import Components.Game (Action(..), gameComponent)
 import Effect (Effect)
-import Effect.Aff (Aff, launchAff_)
-import Effect.Class (liftEffect)
+import Effect.Aff (Aff, Milliseconds(..), delay, forkAff)
+import Engine.Environment (Environment)
 import Game.Engine (runEngine)
-import Game.GameEnvironment (GameEnvironment)
 import Game.GameState (GameState(..))
-import Game.Loop.Root (game)
-import Game.Saving (loadGame)
-import Node.ReadLine as RL
-
-initialState :: GameState
-initialState = (MainMenu)
+import Game.Loop.Root (gameLoop)
+import Halogen (liftEffect)
+import Halogen as H
+import Halogen.Aff as HA
+import Halogen.VDom.Driver (runUI)
+import MainConsole (initialState)
+import Queue as Q
 
 main :: Effect Unit
-main = launchAff_ do
+main = HA.runHalogenAff do
 
-  interface <- liftEffect $ RL.createConsoleInterface RL.noCompletion
-  save <- loadGame "dia"
+  input <- liftEffect $ Q.new
 
-  let 
+  let
+  
+    environment :: Environment
+    environment = { input }
 
-    env :: GameEnvironment
-    env = { interface }
+    initialGameState :: GameState
+    initialGameState = MainMenu
 
-    gameLoopRunner :: GameState -> Aff Unit
-    gameLoopRunner currentState = do
-      newState <- runEngine env (game currentState)
-      gameLoopRunner newState
-          
+  body <- HA.awaitBody
+  
+  halogenIO <- runUI (gameComponent environment initialGameState) unit body
 
-  (gameLoopRunner initialState)
+  void $ forkAff $ do
+    let 
+      gameLoopRunner :: GameState -> Aff Unit
+      gameLoopRunner currentState = do
+        newState <- runEngine environment (gameLoop currentState)
+        _ <- halogenIO.query $ H.tell $ Turn newState
+        gameLoopRunner newState
+    gameLoopRunner initialState
+
+  pure unit

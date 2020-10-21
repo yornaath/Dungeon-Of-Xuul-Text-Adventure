@@ -2,7 +2,6 @@ module Game.Loop.CharacterCreation where
   
 import Prelude
 
-import Control.Monad.Reader (ask)
 import Data.Character (mkCharacterSheet)
 import Data.Die (d20, tossDies)
 import Data.Experience (Experience(..))
@@ -15,15 +14,12 @@ import Data.Stats (Stats, mkStats)
 import Data.String (toLower)
 import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
-import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
-import Game.Engine (Engine)
+import Game.Engine (Engine, prompt, log)
 import Game.GameState (GameState(..))
-import Game.Loop.Playing.PlayingState (startGame)
-import Lib.AffReadline (question)
-import Static.Text as StaticText
 import Game.Loop.CharacterCreation.CreatingCharacterState (CreatingCharacterState)
+import Game.Loop.Playing.PlayingState (startGame)
+import Static.Text as StaticText
 
 characterCreation :: CreatingCharacterState -> Array String -> Engine GameState
 characterCreation state input = do
@@ -37,11 +33,13 @@ characterCreation state input = do
 creationform :: CreatingCharacterState -> Engine GameState
 creationform state = do
 
-  { interface } <- ask
-
-  name <- liftAff $ question interface "Character name: "
+  log "Name: \n"
+  name <- prompt
 
   role <- chooseRole state
+
+  log $ "Chose class: " <> show role <> "\n"
+
   stats <- allocateStats state
 
   let characterSheet = mkCharacterSheet name role stats (Experience 0)
@@ -50,7 +48,8 @@ creationform state = do
   log $ show characterSheet
   log "----------------------------------- \n"
   
-  confirmed <- liftAff $ question interface "Happy with this choice? (type yes to continue, no to start over): "
+  log "Happy with this choice? (type yes to continue, no to start over): \n"
+  confirmed <- prompt
 
   if (toLower confirmed) == "y" || (toLower confirmed) == "yes" then 
     pure (Playing $ startGame characterSheet dungeonOfXul)
@@ -60,8 +59,8 @@ creationform state = do
 
 chooseRole :: CreatingCharacterState -> Engine Role
 chooseRole state = do
-  { interface } <- ask
-  roleInput <- liftAff $ question interface "Choose a class(Warrior, Thief or Mage): "
+  log "Choose a class(Warrior, Thief or Mage): \n"
+  roleInput <- prompt 
   case toLower roleInput of 
     "thief" ->    do pure Thief
     "warrior" ->  do pure Warrior
@@ -73,7 +72,6 @@ chooseRole state = do
 
 allocateStats :: CreatingCharacterState -> Engine Stats
 allocateStats state = do
-  { interface } <- ask
   
   rolledDies <- liftEffect $ sequence $ tossDies (d20 : d20 : d20 : Nil)
 
@@ -83,7 +81,8 @@ allocateStats state = do
   log $ "Results: " <> (foldl (\acc d -> acc <> (show d) <> " ") "" rolledDies)
   log $ "Total: " <> (show total)
 
-  confirmed <- liftAff $ question interface "Keep rolls? (yes to keep, no to re-roll): "
+  log "Keep rolls? (yes to keep, no to re-roll):\n"
+  confirmed <- prompt 
 
   if (toLower confirmed) == "n" || (toLower confirmed) == "no" then 
     allocateStats state
@@ -98,8 +97,8 @@ allocateStats state = do
 
 pickStat :: String -> Int -> (Engine (Tuple Int Int))
 pickStat statname total = do
-  { interface } <- ask
-  numString <- liftAff $ question interface ("Choose " <> statname <> " (" <> show total <> "): ")
+  log ("Choose " <> statname <> " (" <> show total <> "):\n ")
+  numString <- prompt 
   let num = fromString numString
   case num of 
     Nothing -> do 

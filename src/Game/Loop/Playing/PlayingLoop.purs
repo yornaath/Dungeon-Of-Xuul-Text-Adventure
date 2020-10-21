@@ -2,19 +2,18 @@ module Game.Loop.Playing.PlayingLoop where
 
 import Prelude
 
-import Control.Monad.Reader (ask)
 import Data.Dialogue (Dialogue)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Newtype (wrap)
+import Data.String (split)
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (liftAff)
-import Effect.Class.Console (log, logShow)
-import Game.Engine (Engine)
+import Engine.SaveGames (saveGame)
+import Game.Engine (Engine, prompt, log)
 import Game.GameState (GameState(..))
 import Game.Loop.Playing.Dialogue.DialogueLoop (dialogue)
 import Game.Loop.Playing.PlayingState (PlayingState)
-import Game.Saving (saveGame)
-import Lib.AffReadline (command)
 
 playing :: PlayingState -> Array String -> Engine GameState
 playing state input = do
@@ -30,14 +29,14 @@ playing state input = do
       saved <- liftAff $ saveGame save (Playing state)
       pure (Playing state)
     [":c"] -> do 
-      logShow state.character
+      log $ show state.character
       pure (Playing state)
     ["talk"] -> do
       dialogue state testDialogue 1
     [] -> do
-      { interface } <- ask
-      input' <- liftAff $ command interface "> "
-      playing state input'
+      input' <- prompt
+      let command = (split (wrap " ")) input'
+      playing state command
     _ -> do
       pure (Playing state)
 

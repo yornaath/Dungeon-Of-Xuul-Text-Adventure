@@ -7,7 +7,6 @@ import Data.Newtype (wrap)
 import Data.String (split)
 import Effect (Effect)
 import Effect.Aff (Aff, makeAff, nonCanceler)
-import Effect.Aff.Class (liftAff)
 import Effect.Class.Console (log)
 import Node.ReadLine (Interface)
 import Node.ReadLine as RL

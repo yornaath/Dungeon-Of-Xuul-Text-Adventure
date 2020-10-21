@@ -8,8 +8,8 @@ import Game.Loop.CharacterCreation (characterCreation)
 import Game.Loop.MainMenu (mainMenu)
 import Game.Loop.Playing.PlayingLoop (playing)
 
-game :: GameState -> Engine GameState
-game state = do
+gameLoop :: GameState -> Engine GameState
+gameLoop state = do
   case state of
     (MainMenu) -> do
       newState <- mainMenu state []
