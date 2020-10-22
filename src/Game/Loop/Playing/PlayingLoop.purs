@@ -10,7 +10,7 @@ import Data.String (split)
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (liftAff)
 import Engine.SaveGames (saveGame)
-import Game.Engine (Engine, prompt, log)
+import Game.Engine (Engine, liftEngine, log, prompt)
 import Game.GameState (GameState(..))
 import Game.Loop.Playing.Dialogue.DialogueLoop (dialogue)
 import Game.Loop.Playing.PlayingState (PlayingState)
@@ -22,17 +22,17 @@ playing state input = do
       log ":save savename -- Save a game by its name"
       log ":exit -- Exit to main menu"
       log ":c -- Inspect character"
-      pure (Playing state)
+      playing state []
     [":exit"] -> do
       pure (MainMenu)
     [":save", save] -> do
       saved <- liftAff $ saveGame save (Playing state)
-      pure (Playing state)
+      playing state []
     [":c"] -> do 
       log $ show state.character
-      pure (Playing state)
+      playing state []
     ["talk"] -> do
-      dialogue state testDialogue 1
+      liftEngine $ dialogue state testDialogue 1
     [] -> do
       input' <- prompt
       let command = (split (wrap " ")) input'

@@ -1,11 +1,14 @@
 module Data.Location where
   
-import Data.List (List)
+import Prelude
+
 import Data.Argonaut.Decode.Class (class DecodeJson)
 import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode.Class (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
+import Data.List (List)
 
 data Location = Location {
   name :: String,
@@ -14,6 +17,9 @@ data Location = Location {
 }
 
 derive instance genericLocation :: Generic Location _
+
+instance showLocation :: Show Location where
+  show loc = genericShow loc
 
 instance encodeJsonLocation :: EncodeJson Location where
   encodeJson a = genericEncodeJson a
@@ -26,6 +32,8 @@ newtype Exit = Exit {
   description :: String,
   location :: Location
 }
+
+derive newtype instance showExit :: Show Exit
 
 derive instance genericExit :: Generic Exit _
 

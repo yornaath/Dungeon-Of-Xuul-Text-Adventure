@@ -7,6 +7,8 @@ import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either(..))
 import Data.List as L
 import Data.Maybe (Maybe(..))
+import Data.String (Pattern(..), split)
+import Data.Traversable (for_, sequence)
 import Effect.Aff (Aff, makeAff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -44,7 +46,8 @@ instance engineEngineM :: EngineM Engine where
 
   log str = do
     logQueue <- asks _.log
-    liftEffect $ Q.put logQueue str
+    let lines = ( split (Pattern "\n") str)
+    liftEffect $ for_ lines (Q.put logQueue)
     pure unit
 
   prompt = do

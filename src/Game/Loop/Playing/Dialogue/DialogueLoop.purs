@@ -10,8 +10,7 @@ import Data.Int (fromString)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Effect.Class.Console (log)
-import Game.Engine (Engine, prompt)
+import Game.Engine (Engine, log, prompt)
 import Game.GameState (GameState(..))
 import Game.Loop.Playing.PlayingState (PlayingState)
 
@@ -22,7 +21,7 @@ dialogue state dialogue' index = do
     (Just choicePoint) -> do
       log $ renderChoicePoint choicePoint
       reply <- askForReply choicePoint
-      log $ name <> " “" <> reply.text <> "”"
+      log $ name <> "“" <> reply.text <> "”"
       case reply.next of 
         (Just nextIndex) -> do 
           dialogue (state { turn = state.turn + 1}) dialogue' nextIndex
