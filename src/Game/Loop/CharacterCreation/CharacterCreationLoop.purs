@@ -36,6 +36,8 @@ creationform state = do
   log "Name: \n"
   name <- prompt
 
+  log $ "Name: " <> name <> "\n"
+
   role <- chooseRole state
 
   log $ "Chose class: " <> show role <> "\n"
@@ -66,7 +68,7 @@ chooseRole state = do
     "warrior" ->  do pure Warrior
     "mage" ->     do pure Mage
     _ -> do
-      log (roleInput <> " is not a recognized class.")
+      log (roleInput <> " is not a recognized class. \n")
       chooseRole state
 
 
@@ -87,27 +89,27 @@ allocateStats state = do
   if (toLower confirmed) == "n" || (toLower confirmed) == "no" then 
     allocateStats state
   else do
-    (Tuple agi pointsLeft) <- pickStat "agility" total
-    (Tuple str pointsLeft') <- pickStat "strength" pointsLeft
-    (Tuple end pointsLeft'') <- pickStat "endurance" pointsLeft'
-    (Tuple wis pointsLeft''') <- pickStat "wisdomw" pointsLeft''
-    (Tuple int pointsLeft'''') <- pickStat "inteligence" pointsLeft'''
+    (Tuple agi pointsLeft) <- pickStat "Agility" total
+    (Tuple str pointsLeft') <- pickStat "Strength" pointsLeft
+    (Tuple end pointsLeft'') <- pickStat "Endurance" pointsLeft'
+    (Tuple wis pointsLeft''') <- pickStat "Wisdom" pointsLeft''
+    (Tuple int pointsLeft'''') <- pickStat "Inteligence" pointsLeft'''
     pure (mkStats agi str end wis int)
 
 
 pickStat :: String -> Int -> (Engine (Tuple Int Int))
 pickStat statname total = do
-  log ("Choose " <> statname <> " (" <> show total <> "):\n ")
+  log ("Choose " <> statname <> " (points left: " <> show total <> "):\n ")
   numString <- prompt 
   let num = fromString numString
   case num of 
     Nothing -> do 
-      log $ "Invalid Number"
+      log $ "Invalid Number \n."
       pickStat statname total
     (Just num') -> do
       let newTotal = total - num'
       if newTotal < 0 then do
-        log $ "You dont have that may points left, (" <> (show total) <> ") available"
+        log $ "You dont have that may points left, (" <> (show total) <> ") available. \n"
         pickStat statname total
       else
         pure (Tuple num' (newTotal))

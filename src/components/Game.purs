@@ -2,9 +2,10 @@ module Components.Game where
 
 import Prelude
 
+import Components.Test as Test
 import Components.Utils (css)
 import Data.Argonaut.Core as AC
-import Data.Array (reverse)
+import Data.Array (index, reverse)
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
@@ -15,12 +16,14 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Queue as Q
-import Web.UIEvent.KeyboardEvent (code)
+import Web.UIEvent.KeyboardEvent (code, ctrlKey)
 
 type State = {
   currentInput :: String,
   game :: GameState,
-  log :: Array String
+  log :: Array String,
+  history :: Array String,
+  historyIndex:: Int
 }
 
 data Action a = 
@@ -28,6 +31,9 @@ data Action a =
   | Noop
   | Return
   | Typing String
+  | Clear
+  | HistoryUp
+  | HistoryDown
 
 data GameQuery a = 
     GameTurn GameState a
@@ -51,7 +57,9 @@ gameComponent environment initialGameState =
   initialState :: _ State
   initialState _ = { currentInput: "", 
                      game: initialGameState,
-                     log: []
+                     log: [],
+                     history: [],
+                     historyIndex: 0
                    }
 
   render state =
@@ -69,11 +77,17 @@ gameComponent environment initialGameState =
               css "prompt",
               HP.value state.currentInput,
               HE.onValueInput \str -> Just (Typing str),
-              HE.onKeyUp \e -> do
-                if code e == "Enter" then 
-                  Just Return
-                else 
-                  Just Noop
+              HE.onKeyUp \e -> do 
+                let 
+                  ctrl = ctrlKey e 
+                  keyCode = code e
+                case keyCode of 
+                  "Enter" -> Just Return
+                  "ArrowUp" -> Just HistoryUp
+                  "ArrowDown" -> Just HistoryDown
+                  "KeyC" -> if ctrl then Just Clear else Just Noop
+                  "Escape" -> Just Clear
+                  _ -> Just Noop
             ]
 
         ],
@@ -104,8 +118,29 @@ gameComponent environment initialGameState =
       H.modify_ _ { currentInput = str }
       pure unit
     Return -> do
-      { currentInput } <- H.get
+      { currentInput, history } <- H.get
       liftEffect $ Q.drain environment.input
       liftEffect $ Q.put environment.input currentInput
-      H.modify_ _ { currentInput = "" }
+      H.modify_ _ { currentInput = "", historyIndex = 0, history = [currentInput] <> history  }
+    Clear -> do
+      H.modify_ _ { currentInput = "", historyIndex = 0}
+    HistoryUp -> do
+      { history, historyIndex } <- H.get
+      let nextIndex = historyIndex + 1
+      let historyItem = index history (nextIndex - 1)
+      case historyItem of 
+        Just str -> do
+          H.modify_ _ { historyIndex = nextIndex, currentInput = str }
+        _ -> do 
+          pure unit
+    HistoryDown -> do
+      { history, historyIndex } <- H.get
+      let nextIndex = if historyIndex > 0 then historyIndex - 1 else 0
+      let historyItem = index history nextIndex
+      case historyItem of 
+        Just str -> do
+          H.modify_ _ { historyIndex = nextIndex, currentInput = str }
+        _ -> do 
+          pure unit
       pure unit
+      

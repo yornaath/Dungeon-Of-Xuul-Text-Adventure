@@ -19,9 +19,9 @@ playing :: PlayingState -> Array String -> Engine GameState
 playing state input = do
   case input of
     ["help"] -> do
-      log ":save savename -- Save a game by its name"
-      log ":exit -- Exit to main menu"
-      log ":c -- Inspect character"
+      log ":save savename     -- Save a game by its name"
+      log ":exit              -- Exit to main menu"
+      log ":c                 -- Inspect character \n"
       playing state []
     [":exit"] -> do
       pure (MainMenu)

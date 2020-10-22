@@ -28,7 +28,7 @@ instance showCharacterSheet :: Show CharacterSheet where
       (Stats stats) = c.stats
       maxhp' = maxhp (CharacterSheet c)
       in
-        c.name <> " \n" <>
+        "Name:          " <> c.name <> " \n" <>
         "Level:         " <> show (levelof c.xp) <> "\n" <>
         "Class:         " <> show c.role <> "\n" <>
         "Experience:    " <> show c.xp <> "\n" <>
