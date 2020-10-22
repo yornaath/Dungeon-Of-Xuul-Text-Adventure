@@ -1,9 +1,11 @@
 module Engine.Environment where
 
+import Engine.Input (Input)
+import Engine.Log (Log)
 import Queue (Queue, READ, WRITE)
 
 type Environment = {
-  input :: Queue (read :: READ, write :: WRITE) String,
-  log :: Queue (read :: READ, write :: WRITE) String
+  input :: Input,
+  log :: Log
 }
 

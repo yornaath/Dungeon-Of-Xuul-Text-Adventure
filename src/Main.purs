@@ -16,12 +16,14 @@ import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
 import MainConsole (initialState)
 import Queue as Q
+import Engine.Input as EngineInput 
+import Engine.Log as EngineLog
 
 main :: Effect Unit
 main = HA.runHalogenAff do
 
-  input <- liftEffect $ Q.new
-  log <- liftEffect $ Q.new
+  input <- liftEffect $ EngineInput.empty
+  log <- liftEffect $ EngineLog.empty
 
   let
   

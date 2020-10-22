@@ -2,7 +2,6 @@ module Game.Loop.MainMenu where
 
 import Prelude
 
-import Control.Monad.Reader (ask)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
 import Data.String (split)
