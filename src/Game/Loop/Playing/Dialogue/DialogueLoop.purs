@@ -21,7 +21,7 @@ dialogue state dialogue' index = do
     (Just choicePoint) -> do
       log $ renderChoicePoint choicePoint
       reply <- askForReply choicePoint
-      log $ name <> "“" <> reply.text <> "”"
+      log $ name <> ": “" <> reply.text <> "”\n"
       case reply.next of 
         (Just nextIndex) -> do 
           dialogue (state { turn = state.turn + 1}) dialogue' nextIndex
@@ -41,7 +41,7 @@ askForReply (Tuple text replies) = do
         (Just reply') -> do 
           pure reply'
         (Nothing) -> do
-          log "Not a valid choice."
+          log "Not a valid choice. \n"
           askForReply (Tuple text replies)
     _ -> do
       askForReply (Tuple text replies)

@@ -3,6 +3,7 @@ module Game.Loop.Playing.PlayingLoop where
 import Prelude
 
 import Data.Dialogue (Dialogue)
+import Data.Location (Location(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
@@ -33,6 +34,10 @@ playing state input = do
       playing state []
     ["talk"] -> do
       liftEngine $ dialogue state testDialogue 1
+    ["look"] -> do
+      let (Location loc) = state.location
+      log $ loc.description <> "\n"
+      playing state []
     [] -> do
       input' <- prompt
       let command = (split (wrap " ")) input'
