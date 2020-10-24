@@ -66,6 +66,7 @@ data Stats = Stats
     int :: Intelligence
   }
 
+
 derive instance genericStats :: Generic Stats _
 
 instance eqStats :: Eq Stats where

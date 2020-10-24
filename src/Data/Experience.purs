@@ -11,7 +11,7 @@ import Data.Int (floor, toNumber)
 import Data.List (List, findIndex, length, (..))
 import Data.Maybe (fromMaybe)
 
-data Experience = Experience Int
+newtype Experience = Experience Int
 
 derive instance genericExperience:: Generic Experience _
 
@@ -24,7 +24,7 @@ instance decodeJsonExperience :: DecodeJson Experience where
 instance showExperience :: Show Experience where
   show (Experience xp) = "Experience " <> show xp
 
-data Level = Level Int
+newtype Level = Level Int
 
 unLevel:: Level -> Int
 unLevel (Level l) = l
