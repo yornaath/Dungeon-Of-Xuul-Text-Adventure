@@ -8,6 +8,7 @@ import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Foldable (foldl)
 import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Eq (genericEq)
 import Data.Generic.Rep.Show (genericShow)
 import Data.List (List)
 import Data.Newtype (class Newtype)
@@ -19,6 +20,7 @@ derive newtype instance semiringAgility :: Semiring Agility
 derive newtype instance encodeJsonAgility :: EncodeJson Agility
 derive newtype instance decodeJsonAgility :: DecodeJson Agility
 derive newtype instance showAgility :: Show Agility
+derive newtype instance eqAgility :: Eq Agility
 
 newtype Strength = Strength Int
 
@@ -27,6 +29,7 @@ derive newtype instance semiringStrength :: Semiring Strength
 derive newtype instance encodeJsonStrength :: EncodeJson Strength
 derive newtype instance decodeJsonStrength :: DecodeJson Strength
 derive newtype instance showStrength :: Show Strength
+derive newtype instance eqStrength :: Eq Strength
 
 newtype Endurance = Endurance Int
 
@@ -35,6 +38,7 @@ derive newtype instance semiringEndurance :: Semiring Endurance
 derive newtype instance encodeJsonEndurance :: EncodeJson Endurance
 derive newtype instance decodeJsonEndurance :: DecodeJson Endurance
 derive newtype instance showEndurance :: Show Endurance
+derive newtype instance eqEndurance :: Eq Endurance
 
 newtype Wisdom = Wisdom Int
 
@@ -43,6 +47,7 @@ derive newtype instance semiringWisdom :: Semiring Wisdom
 derive newtype instance encodeJsonWisdom :: EncodeJson Wisdom
 derive newtype instance decodeJsonWisdom :: DecodeJson Wisdom
 derive newtype instance showWisdom :: Show Wisdom
+derive newtype instance eqWisdom :: Eq Wisdom
 
 newtype Intelligence = Intelligence Int
 
@@ -51,6 +56,7 @@ derive newtype instance semiringIntelligence :: Semiring Intelligence
 derive newtype instance encodeJsonIntelligence :: EncodeJson Intelligence
 derive newtype instance decodeJsonIntelligence :: DecodeJson Intelligence
 derive newtype instance showIntelligence :: Show Intelligence
+derive newtype instance eqIntelligence :: Eq Intelligence
 
 data Stats = Stats 
   { agi :: Agility,
@@ -61,6 +67,9 @@ data Stats = Stats
   }
 
 derive instance genericStats :: Generic Stats _
+
+instance eqStats :: Eq Stats where
+  eq = genericEq
 
 instance showStats :: Show Stats where
   show = genericShow

@@ -26,6 +26,9 @@ instance showExperience :: Show Experience where
 
 data Level = Level Int
 
+unLevel:: Level -> Int
+unLevel (Level l) = l
+
 instance showLevel :: Show Level where
   show (Level l) = "Level " <> show l
 
@@ -39,3 +42,5 @@ levelof (Experience xp) =
     level' = (+) 1 $ fromMaybe ((-) (length levels') 1) (findIndex (\minxp -> minxp > xp) levels')
   in
     Level level'
+
+

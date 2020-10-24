@@ -6,19 +6,33 @@ import Data.Argonaut.Decode (class DecodeJson)
 import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
-import Data.Experience (Experience, Level(..), levelof)
+import Data.Either (Either(..))
+import Data.Experience (Experience(..), Level(..), levelof, unLevel)
+import Data.Foldable (find)
 import Data.Generic.Rep (class Generic)
 import Data.Int (floor, toNumber)
+import Data.Item (Item(..), unItem)
+import Data.Maybe (Maybe(..))
 import Data.Role (Role)
 import Data.Stats (Endurance(..), Stats(..))
 
 data CharacterSheet = CharacterSheet 
-  { name :: String,
-    stats :: Stats,
-    role :: Role,
-    xp :: Experience,
-    hp :: Int
+  { name        :: String,
+    stats       :: Stats,
+    role        :: Role,
+    xp          :: Experience,
+    hp          :: Int,
+    inventory   :: Array Item,
+    equipped    :: Equipment
   }
+
+type Equipment = {
+  helmet  :: Maybe Item,
+  chest   :: Maybe Item,
+  hands   :: Maybe Item,
+  leggs   :: Maybe Item,
+  feet    :: Maybe Item
+}
 
 derive instance genericCharacterSheet:: Generic CharacterSheet _
 
@@ -53,7 +67,15 @@ mkCharacterSheet name role stats xp =
       role,
       stats,
       xp,
-      hp: 0
+      hp: 0,
+      inventory: [],
+      equipped: {
+        helmet: Nothing,
+        chest: Nothing,
+        hands: Nothing,
+        leggs: Nothing,
+        feet: Nothing
+      }
     }
     hp = maxhp (CharacterSheet sheet)
   in
@@ -68,3 +90,29 @@ maxhp (CharacterSheet cs) =
     hp' = (10 * l) * floor ((toNumber end) * 1.5)
   in
     hp'
+
+hasItem :: Item -> CharacterSheet -> Boolean
+hasItem item (CharacterSheet sheet) = 
+  case find (\item' -> item' == item) sheet.inventory of 
+    Just _ -> true
+    Nothing -> false
+
+meetsLevelRequirementOfItem :: Item -> CharacterSheet -> Boolean
+meetsLevelRequirementOfItem item (CharacterSheet sheet) = unLevel (levelof sheet.xp) >= (unItem item).levelRequirement
+
+equip :: Item -> CharacterSheet -> Either String CharacterSheet
+equip item sheet | not $ hasItem item sheet = Left "Player doest not have that item in inventory"
+equip item sheet | not $ meetsLevelRequirementOfItem item sheet = Left "Player does not meet the level requirement for that item"
+equip item (CharacterSheet sheet) = do
+  let equipped = sheet.equipped
+  case item of 
+    Helmet item' -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { helmet = Just $ Helmet item' } }
+    Chest item' -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { chest = Just $ Chest item' } }
+    Hands item' -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { hands = Just $ Hands item' } }
+    Leggs item' -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { leggs = Just $ Leggs item' } }
+    Feet item' -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { feet = Just $ Feet item' } }
