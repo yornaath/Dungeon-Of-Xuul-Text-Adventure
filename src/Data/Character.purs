@@ -14,7 +14,7 @@ import Data.Int (floor, toNumber)
 import Data.Item (Item(..), unItem)
 import Data.Maybe (Maybe(..))
 import Data.Role (Role)
-import Data.Stats (Endurance(..), Stats(..), emptyStats)
+import Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats)
 
 data CharacterSheet = CharacterSheet 
   { name        :: String,
@@ -39,19 +39,19 @@ derive instance genericCharacterSheet:: Generic CharacterSheet _
 instance showCharacterSheet :: Show CharacterSheet where
   show (CharacterSheet c) =
     let 
-      (Stats stats) = c.stats
+      (Stats stats) = totalStats $ CharacterSheet c
       maxhp' = maxhp (CharacterSheet c)
       in
-        "Name:          " <> c.name <> " \n" <>
-        "Level:         " <> show (levelof c.xp) <> "\n" <>
-        "Class:         " <> show c.role <> "\n" <>
-        "Experience:    " <> show c.xp <> "\n" <>
-        "Agility:       " <> show stats.agi <> "\n" <>
-        "Strength:      " <> show stats.str <> "\n" <>
-        "Endurance:     " <> show stats.end <> "\n" <>
-        "Wisdom:        " <> show stats.wis <> "\n" <>
-        "Intelligence:  " <> show stats.int <> "\n" <> 
-        "HP:            " <> (show c.hp) <> "/" <> (show maxhp') <> "\n"
+        "Name:          " <> c.name                               <> "\n" <>
+        "Level:         " <> show (levelof c.xp)                  <> "\n" <>
+        "Class:         " <> show c.role                          <> "\n" <>
+        "Experience:    " <> show c.xp                            <> "\n" <>
+        "Agility:       " <> show stats.agi                       <> "\n" <>
+        "Strength:      " <> show stats.str                       <> "\n" <>
+        "Endurance:     " <> show stats.end                       <> "\n" <>
+        "Wisdom:        " <> show stats.wis                       <> "\n" <>
+        "Intelligence:  " <> show stats.int                       <> "\n" <> 
+        "HP:            " <> (show c.hp) <> "/" <> (show maxhp')  <> "\n"
 
 instance encodeJsonCharacterSheet :: EncodeJson CharacterSheet where
   encodeJson a = genericEncodeJson a
@@ -71,7 +71,7 @@ mkCharacterSheet name role stats xp =
       hp: 0,
       inventory: [],
       equipped: {
-        helmet: Nothing,
+        helmet: Just $ Helmet { name: "Howler", description: "Nasty looking thing", stats: mkStats 2 4 0 0 0, levelRequirement: 0},
         chest: Nothing,
         hands: Nothing,
         leggs: Nothing,
