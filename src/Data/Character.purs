@@ -15,6 +15,7 @@ import Data.Item (Item(..), unItem)
 import Data.Maybe (Maybe(..))
 import Data.Role (Role)
 import Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats)
+import Data.String (toLower)
 
 data CharacterSheet = CharacterSheet 
   { name        :: String,
@@ -122,6 +123,7 @@ hasItem item (CharacterSheet sheet) =
     Just _ -> true
     Nothing -> false
 
+
 canEquip :: Item -> CharacterSheet -> Boolean
 canEquip item (CharacterSheet sheet) = characterLevel >= req
   where 
@@ -145,3 +147,20 @@ equip item (CharacterSheet sheet) = do
       Right $ CharacterSheet $ sheet { equipped = equipped { leggs = Just $ Leggs item' } }
     Feet item' -> 
       Right $ CharacterSheet $ sheet { equipped = equipped { feet = Just $ Feet item' } }
+
+unEquip :: String -> CharacterSheet -> Either String CharacterSheet
+unEquip itemSlot (CharacterSheet sheet) = 
+  let equipped = sheet.equipped
+  in case toLower itemSlot of 
+    "helmet"  -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { helmet = Nothing } }
+    "chest"  -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { chest = Nothing } }
+    "hands"  -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { hands = Nothing } }
+    "leggs"  -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { leggs = Nothing } }
+    "feet"  -> 
+      Right $ CharacterSheet $ sheet { equipped = equipped { feet = Nothing } }
+    _ ->
+      Left ("no slot for " <> itemSlot)
