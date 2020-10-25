@@ -75,16 +75,21 @@ instance eqStats :: Eq Stats where
 instance showStats :: Show Stats where
   show = genericShow
 
-instance semigroupStats :: Semigroup Stats where
-  append (Stats a) (Stats b) = Stats { agi, str, end, wis, int } where
+instance semigroupStats :: Semiring Stats where
+  zero = mkStats 0 0 0 0 0
+  one = mkStats 1 1 1 1 1
+  add (Stats a) (Stats b) = Stats { agi, str, end, wis, int } where
     agi = a.agi + b.agi
     str = a.str + b.str 
     end = a.end + b.end
     wis = a.wis + b.wis
     int = a.int + b.int
-
-instance monoidStats :: Monoid Stats where
-  mempty = emptyStats
+  mul (Stats a) (Stats b) = Stats { agi, str, end, wis, int } where
+    agi = a.agi * b.agi
+    str = a.str * b.str 
+    end = a.end * b.end
+    wis = a.wis * b.wis
+    int = a.int * b.int
 
 instance encodeJsonStats :: EncodeJson Stats where
   encodeJson a = genericEncodeJson a
@@ -110,5 +115,5 @@ emptyStats = Stats {
   int: Intelligence 0
 }
 
-total :: List Stats -> Stats
-total statsList = foldl (<>) emptyStats statsList
+total :: Array Stats -> Stats
+total statsList = foldl (+) emptyStats statsList

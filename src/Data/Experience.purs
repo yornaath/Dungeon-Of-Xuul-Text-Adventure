@@ -3,34 +3,35 @@ module Data.Experience where
 import Prelude
 
 import Data.Argonaut.Decode (class DecodeJson)
-import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
-import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
-import Data.Generic.Rep (class Generic)
 import Data.Int (floor, toNumber)
 import Data.List (List, findIndex, length, (..))
 import Data.Maybe (fromMaybe)
+import Data.Newtype (class Newtype)
 
 newtype Experience = Experience Int
 
-derive instance genericExperience:: Generic Experience _
+derive instance newtypeExperience :: Newtype Experience _
+derive newtype instance semiringExperience :: Semiring Experience
+derive newtype instance encodeJsonExperience :: EncodeJson Experience
+derive newtype instance decodeJsonExperience :: DecodeJson Experience
+derive newtype instance showExperience :: Show Experience
+derive newtype instance eqExperience :: Eq Experience
+derive newtype instance ordExperience :: Ord Experience
 
-instance encodeJsonExperience :: EncodeJson Experience where
-  encodeJson a = genericEncodeJson a
-
-instance decodeJsonExperience :: DecodeJson Experience where
-  decodeJson a = genericDecodeJson a
-
-instance showExperience :: Show Experience where
-  show (Experience xp) = "Experience " <> show xp
 
 newtype Level = Level Int
 
+derive instance newtypeLevel :: Newtype Level _
+derive newtype instance semiringLevel :: Semiring Level
+derive newtype instance encodeJsonLevel :: EncodeJson Level
+derive newtype instance decodeJsonLevel :: DecodeJson Level
+derive newtype instance showLevel :: Show Level
+derive newtype instance eqLevel :: Eq Level
+derive newtype instance ordLevel :: Ord Level
+
 unLevel:: Level -> Int
 unLevel (Level l) = l
-
-instance showLevel :: Show Level where
-  show (Level l) = "Level " <> show l
 
 levels :: List Int
 levels = map (\b -> floor $ (toNumber b) * (1.0 + (toNumber b) * 2.0)) (1..60)

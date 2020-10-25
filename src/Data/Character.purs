@@ -6,16 +6,22 @@ import Data.Argonaut.Decode (class DecodeJson)
 import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
+import Data.Array (fromFoldable)
 import Data.Either (Either(..))
 import Data.Experience (Experience, Level(..), levelof, unLevel)
 import Data.Foldable (find, foldl)
 import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Eq (genericEq)
+import Data.Generic.Rep.Ord (genericCompare)
+import Data.Generic.Rep.Show (genericShow)
 import Data.Int (floor, toNumber)
-import Data.Item (Item(..), unItem)
+import Data.Item.Equipment (Equipment(..), levelRequirementOf, statsOf)
+import Data.List ((:))
+import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Role (Role)
-import Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats)
-import Data.String (toLower)
+import Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats, total)
+import Data.Tuple (Tuple(..))
 
 data CharacterSheet = CharacterSheet 
   { name        :: String,
@@ -23,17 +29,11 @@ data CharacterSheet = CharacterSheet
     role        :: Role,
     xp          :: Experience,
     hp          :: Int,
-    inventory   :: Array Item,
-    equipped    :: Equipment
+    inventory   :: {
+      equipment :: Array Equipment
+    },
+    equipped    :: Equiped
   }
-
-type Equipment = {
-  helmet  :: Maybe Item,
-  chest   :: Maybe Item,
-  hands   :: Maybe Item,
-  leggs   :: Maybe Item,
-  feet    :: Maybe Item
-}
 
 derive instance genericCharacterSheet:: Generic CharacterSheet _
 
@@ -61,23 +61,53 @@ instance decodeJsonCharacterSheet :: DecodeJson CharacterSheet where
   decodeJson a = genericDecodeJson a
 
 
+data GearSlot
+  = Head
+  | Chest
+  | Hands
+  | Leggs
+  | Feet
+  | MainHand
+  | OffHand 
+
+type Equiped = M.Map GearSlot (Maybe Equipment)
+
+derive instance genericGearSlot:: Generic GearSlot _
+
+instance eqGearSlot :: Eq GearSlot where
+  eq = genericEq
+
+instance ordGearSlot :: Ord GearSlot where
+  compare = genericCompare
+
+instance showGearSlot :: Show GearSlot where
+  show = genericShow
+
+instance encodeJsonGearSlot :: EncodeJson GearSlot where
+  encodeJson a = genericEncodeJson a
+
+instance decodeJsonGearSlot :: DecodeJson GearSlot where
+  decodeJson a = genericDecodeJson a
+
+
+
 mkCharacterSheet :: String -> Role -> Stats -> Experience -> CharacterSheet
 mkCharacterSheet name role stats xp =
   let 
     sheet = {
-      name,
-      role,
-      stats,
-      xp,
-      hp: 0,
-      inventory: [],
-      equipped: {
-        helmet: Just $ Helmet { name: "Howler", description: "Nasty looking thing", stats: mkStats 2 4 0 0 0, levelRequirement: 0},
-        chest: Nothing,
-        hands: Nothing,
-        leggs: Nothing,
-        feet: Nothing
-      }
+      name, role, stats, xp, hp: 0,
+      inventory: {
+        equipment: []
+      },
+      equipped: M.fromFoldable [
+        Tuple (Head) $ Just $ Helmet { name: "Howler", description: "Nasty looking thing", stats: mkStats 2 4 0 0 0, levelRequirement: Level 0},
+        Tuple (Chest) Nothing,
+        Tuple (Hands) Nothing,
+        Tuple (Leggs) Nothing,
+        Tuple (Feet) Nothing,
+        Tuple (MainHand) Nothing,
+        Tuple (OffHand) Nothing
+      ]
     }
     hp = maxhp (CharacterSheet sheet)
   in
@@ -97,70 +127,79 @@ maxhp characterSheet =
     hp'
 
 
-equippedStats :: Equipment -> Array Stats
-equippedStats equipment = itemStatsOrEmpty <$> equipedItems where
+equippedStats :: Equiped -> Array Stats
+equippedStats equiped = itemStatsOrEmpty <$> equipedItems where
   itemStatsOrEmpty item = case item of  
-    Just item' -> (unItem item').stats 
+    Just item' -> statsOf item' 
     Nothing -> emptyStats
-  equipedItems = [
-    equipment.helmet,
-    equipment.chest,
-    equipment.hands,
-    equipment.leggs,
-    equipment.feet
-  ]
+  equipedItems = fromFoldable $ M.values equiped
 
 
 totalStats :: CharacterSheet -> Stats
-totalStats (CharacterSheet sheet) = foldl (<>) emptyStats allStats
+totalStats (CharacterSheet sheet) = total allStats
   where 
     allStats = [sheet.stats] <> (equippedStats sheet.equipped)
 
 
-hasItem :: Item -> CharacterSheet -> Boolean
+hasItem :: Equipment -> CharacterSheet -> Boolean
 hasItem item (CharacterSheet sheet) = 
-  case find (\item' -> item' == item) sheet.inventory of 
+  case find (\item' -> item' == item) sheet.inventory.equipment of 
     Just _ -> true
     Nothing -> false
 
 
-canEquip :: Item -> CharacterSheet -> Boolean
+canEquip :: Equipment -> CharacterSheet -> Boolean
 canEquip item (CharacterSheet sheet) = characterLevel >= req
-  where 
-    characterLevel = unLevel (levelof sheet.xp)
-    req = (unItem item).levelRequirement
+  where
+    characterLevel = levelof sheet.xp
+    req = levelRequirementOf item
+
+equip :: CharacterSheet -> GearSlot -> Equipment -> Either String CharacterSheet
+
+equip (CharacterSheet character) (Head) (Helmet item) = 
+  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (Helmet item)) Head character.equipped }
+equip (CharacterSheet character) (Chest) (ChestPlate item) = 
+  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (ChestPlate item)) Chest character.equipped }
+equip (CharacterSheet character) (Hands) (Gloves item) = 
+  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (Gloves item)) Hands character.equipped }
+equip (CharacterSheet character) (Leggs) (LeggGuards item) = 
+  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (LeggGuards item)) Leggs character.equipped }
+equip (CharacterSheet character) (Feet) (Shoes item) = 
+  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (Shoes item)) Feet character.equipped }
+
+equip (CharacterSheet character) (MainHand) item = case item of 
+  (LongSword item') -> 
+    Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (LongSword item')) MainHand character.equipped }
+  -- GreatSword -> 
+
+  -- Dagger -> 
+
+  -- Bow -> 
+
+  -- Staff -> 
+  _ -> 
+    Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
 
-equip :: Item -> CharacterSheet -> Either String CharacterSheet
-equip item sheet | not $ hasItem item sheet = Left "Player doest not have that item in inventory"
-equip item sheet | not $ canEquip item sheet = Left "Player does not meet the level requirement for that item"
-equip item (CharacterSheet sheet) = do
-  let equipped = sheet.equipped
-  case item of 
-    Helmet item' -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { helmet = Just $ Helmet item' } }
-    Chest item' -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { chest = Just $ Chest item' } }
-    Hands item' -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { hands = Just $ Hands item' } }
-    Leggs item' -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { leggs = Just $ Leggs item' } }
-    Feet item' -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { feet = Just $ Feet item' } }
+equip character slot item = 
+  Left $ "Cannot equip " <> show item <> " in slot: " <> show slot
 
-unEquip :: String -> CharacterSheet -> Either String CharacterSheet
-unEquip itemSlot (CharacterSheet sheet) = 
-  let equipped = sheet.equipped
-  in case toLower itemSlot of 
-    "helmet"  -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { helmet = Nothing } }
-    "chest"  -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { chest = Nothing } }
-    "hands"  -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { hands = Nothing } }
-    "leggs"  -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { leggs = Nothing } }
-    "feet"  -> 
-      Right $ CharacterSheet $ sheet { equipped = equipped { feet = Nothing } }
-    _ ->
-      Left ("no slot for " <> itemSlot)
+unEquip :: CharacterSheet -> GearSlot -> CharacterSheet
+unEquip (CharacterSheet character) slot =
+  CharacterSheet $ character { equipped = M.update (\_ -> Just $ Nothing) slot character.equipped }
+-- unEquip :: Item -> CharacterSheet -> Either String CharacterSheet
+-- unEquip item (CharacterSheet sheet) =
+--   case item of 
+--     (sheet.equipped.helmet) -> Left "lol" 
+--     -- "helmet"  ->
+--     --   Right $ CharacterSheet $ sheet { equipped = equipped { helmet = Nothing } }
+--     -- "chest"  -> 
+--     --   Right $ CharacterSheet $ sheet { equipped = equipped { chest = Nothing } }
+--     -- "hands"  -> 
+--     --   Right $ CharacterSheet $ sheet { equipped = equipped { hands = Nothing } }
+--     -- "leggs"  -> 
+--     --   Right $ CharacterSheet $ sheet { equipped = equipped { leggs = Nothing } }
+--     -- "feet"  -> 
+--     --   Right $ CharacterSheet $ sheet { equipped = equipped { feet = Nothing } }
+--     -- _ ->
+--     --   Tuple Nothing sheet
