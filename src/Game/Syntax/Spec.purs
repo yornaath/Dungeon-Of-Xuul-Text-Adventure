@@ -9,7 +9,7 @@ import Data.Generic.Rep.Show (genericShow)
 data Expression =
     Load String
   | Save String
-  | Turn PlayerAction
+  | Action PlayerAction
 
 derive instance genericExpression:: Generic Expression _
 
@@ -21,10 +21,12 @@ instance eqExpression :: Eq Expression where
 
 data PlayerAction = 
     Move String
-  | Take String
-  | TakeItemFrom String String
   | Look
   | Inspect String
+  | Take String
+  | TakeItemFrom String String
+  | Combat CombatTurn
+  | Consume String
 
 derive instance genericPlayerAction:: Generic PlayerAction _
 
@@ -32,4 +34,16 @@ instance showPlayerAction :: Show PlayerAction where
   show = genericShow
 
 instance eqPlayerAction :: Eq PlayerAction where
+  eq = genericEq
+
+data CombatTurn = 
+    Attack String
+  | Cast String
+
+derive instance genericCombatTurn:: Generic CombatTurn _
+
+instance showCombatTurn:: Show CombatTurn where
+  show = genericShow
+
+instance eqCombatTurn :: Eq CombatTurn where
   eq = genericEq
