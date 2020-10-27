@@ -9,51 +9,63 @@ import Game.Syntax.Spec (Expression(..), PlayerAction(..))
 import Lib.Parser (Parser, anySpace, finiteString, runParser, someSpace, string)
 
 actionParser :: Parser PlayerAction 
-actionParser = moveAction
+actionParser = move <|> take
 
-moveAction:: Parser PlayerAction
-moveAction = do
+move:: Parser PlayerAction
+move = do
   _ <- anySpace
   _ <- string "move"
   _ <- (string " to ") <|> someSpace
   whereTo <- finiteString
   pure $ Move whereTo
 
-expressionParser :: Parser Expression
-expressionParser = loadExpression <|> saveExpression <|> (Turn <$> actionParser)
+take :: Parser PlayerAction
+take = takeItemFrom <|> takeItem
 
-loadExpression :: Parser Expression
-loadExpression = do
+takeItem :: Parser PlayerAction
+takeItem = do
+  _ <- anySpace
+  _ <- string "take"
+  _ <- someSpace
+  itemName <- finiteString
+  pure $ Take itemName
+
+takeItemFrom:: Parser PlayerAction
+takeItemFrom = do
+  _ <- anySpace
+  _ <- string "take"
+  _ <- someSpace
+  itemName <- finiteString
+  _ <- someSpace
+  _ <- string "from"
+  _ <- someSpace
+  fromWhere <- finiteString
+  pure $ TakeFrom itemName fromWhere
+
+expressionParser :: Parser Expression
+expressionParser = load <|> save <|> turn
+
+load :: Parser Expression
+load = do
   _ <- anySpace
   _ <- string "load"
   _ <- someSpace
   saveGame <- finiteString
   pure (Load saveGame)
 
-saveExpression :: Parser Expression
-saveExpression = do
+save :: Parser Expression
+save = do
   _ <- anySpace
   _ <- string "save"
   _ <- someSpace
   saveGame <- finiteString
   pure (Load saveGame)
 
-turnExpression :: Parser Expression
-turnExpression = do 
+turn :: Parser Expression
+turn = do 
   action <- actionParser
   pure $ Turn action
 
-letStatement :: Parser (Array String)
-letStatement = do
-  declare <- string "let"
-  _ <- someSpace
-  name <- finiteString
-  _ <- someSpace
-  _ <- string "="
-  _ <- someSpace
-  value <- finiteString
-  pure [name, value]
-
 main :: Effect Unit
 main = do
-  logShow $ runParser (expressionParser) "move north"
+  logShow $ runParser (expressionParser) "load game"

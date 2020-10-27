@@ -6,7 +6,9 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 
 data PlayerAction = 
-  Move String
+    Move String
+  | Take String
+  | TakeFrom String String
 
 derive instance genericPlayerAction:: Generic PlayerAction _
 
