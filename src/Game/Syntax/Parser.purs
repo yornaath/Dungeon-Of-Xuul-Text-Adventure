@@ -3,11 +3,14 @@ module Game.Syntax.Parser where
 import Prelude
 
 import Control.Alt ((<|>))
-import Data.Traversable (sequence, traverse_)
+import Data.Array (concat, length, (..))
+import Data.Traversable (for_, sequence, traverse_)
 import Effect (Effect)
-import Effect.Class.Console (logShow)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (logShow, time, timeEnd)
 import Game.Syntax.Spec (Expression(..), PlayerAction(..))
 import Lib.Parser (Parser, anySpace, finiteString, runParser, someSpace, string)
+import Zeta.Compat (flattenArray)
 
 actionParser :: Parser PlayerAction 
 actionParser = move <|> take
@@ -61,5 +64,9 @@ turn = do
 
 main :: Effect Unit
 main = do
-  logShow $ runParser (expressionParser) "move to north"
+  time "parsing"
+  let expressions = concat $ ((\_ -> ["move to north", "take item from bag", "load game", "save game"]) <$> 1..9999)
+  let parseResults = (runParser (expressionParser)) <$> expressions
+  logShow $ length parseResults
+  timeEnd "parsing"
     --logShow $ runParser (sequence [string "foo", string "bar"]) "foobar"
