@@ -7,11 +7,10 @@ import Data.Either (Either(..))
 import Data.Tuple (Tuple(..))
 import Game.Syntax.Parser (move)
 import Game.Syntax.Spec (PlayerAction(..))
-import Lib.Parser (finiteString, runParser)
+import Lib.Parser (runParser)
 import Test.Unit (TestF, suite, test)
 import Test.Unit.Assert as Assert
 
-a = runParser move "move north"
 
 gameParserTests :: Free TestF Unit
 gameParserTests = do
