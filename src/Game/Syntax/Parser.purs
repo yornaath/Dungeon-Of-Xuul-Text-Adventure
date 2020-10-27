@@ -7,6 +7,10 @@ import Data.Traversable (sequence)
 import Game.Syntax.Spec (CombatTurn(..), Expression(..), PlayerAction(..))
 import Lib.Parser (Parser, anySpace, finiteString, literal, someSpace)
 
+--
+-- Root level Expression parser
+--
+
 expressionParser :: Parser Expression
 expressionParser = load <|> save <|> (Action <$> actionParser)
 
@@ -26,6 +30,11 @@ save = do
   saveGame <- finiteString
   pure (Load saveGame)
 
+
+
+--
+-- Player Actions parser
+--
 
 actionParser :: Parser PlayerAction 
 actionParser = move <|> consume <|> take <|> (Combat <$> combatParser)
@@ -62,8 +71,13 @@ takeItemFrom = do
   pure $ TakeItemFrom item from
 
 
+
+--
+-- Combat Actions parser
+--
+
 combatParser :: Parser CombatTurn
-combatParser = attack <|> cast
+combatParser = attack <|> cast <|> defend
 
 attack :: Parser CombatTurn
 attack = do
@@ -80,3 +94,10 @@ cast = do
   _ <- someSpace
   spellName <- finiteString
   pure $ Cast spellName
+
+defend :: Parser CombatTurn
+defend = do
+  _ <- anySpace
+  _ <- (literal "defend")
+  _ <- anySpace
+  pure $ Defend

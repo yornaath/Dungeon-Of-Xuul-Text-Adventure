@@ -39,6 +39,7 @@ instance eqPlayerAction :: Eq PlayerAction where
 data CombatTurn = 
     Attack String
   | Cast String
+  | Defend
 
 derive instance genericCombatTurn:: Generic CombatTurn _
 
