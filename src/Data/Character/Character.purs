@@ -7,16 +7,13 @@ import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Array (fromFoldable)
+import Data.Character.GearSlot (GearSlot(..))
 import Data.Either (Either(..))
-import Data.Experience (Experience, Level(..), levelof, unLevel)
-import Data.Foldable (find, foldl)
+import Data.Experience (Experience, Level(..), levelofExperience)
+import Data.Foldable (find)
 import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Eq (genericEq)
-import Data.Generic.Rep.Ord (genericCompare)
-import Data.Generic.Rep.Show (genericShow)
 import Data.Int (floor, toNumber)
 import Data.Item.Equipment (Equipment(..), levelRequirementOf, statsOf)
-import Data.List ((:))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Role (Role)
@@ -35,6 +32,8 @@ data CharacterSheet = CharacterSheet
     equipped    :: Equiped
   }
 
+type Equiped = M.Map GearSlot (Maybe Equipment)
+
 derive instance genericCharacterSheet:: Generic CharacterSheet _
 
 instance showCharacterSheet :: Show CharacterSheet where
@@ -44,7 +43,7 @@ instance showCharacterSheet :: Show CharacterSheet where
       maxhp' = maxhp (CharacterSheet c)
       in
         "Name:          " <> c.name                               <> "\n" <>
-        "Level:         " <> show (levelof c.xp)                  <> "\n" <>
+        "Level:         " <> show (levelofExperience c.xp)        <> "\n" <>
         "Class:         " <> show c.role                          <> "\n" <>
         "Experience:    " <> show c.xp                            <> "\n" <>
         "Agility:       " <> show stats.agi                       <> "\n" <>
@@ -59,36 +58,6 @@ instance encodeJsonCharacterSheet :: EncodeJson CharacterSheet where
 
 instance decodeJsonCharacterSheet :: DecodeJson CharacterSheet where
   decodeJson a = genericDecodeJson a
-
-
-data GearSlot
-  = Head
-  | Chest
-  | Hands
-  | Leggs
-  | Feet
-  | MainHand
-  | OffHand 
-
-type Equiped = M.Map GearSlot (Maybe Equipment)
-
-derive instance genericGearSlot:: Generic GearSlot _
-
-instance eqGearSlot :: Eq GearSlot where
-  eq = genericEq
-
-instance ordGearSlot :: Ord GearSlot where
-  compare = genericCompare
-
-instance showGearSlot :: Show GearSlot where
-  show = genericShow
-
-instance encodeJsonGearSlot :: EncodeJson GearSlot where
-  encodeJson a = genericEncodeJson a
-
-instance decodeJsonGearSlot :: DecodeJson GearSlot where
-  decodeJson a = genericDecodeJson a
-
 
 
 mkCharacterSheet :: String -> Role -> Stats -> Experience -> CharacterSheet
@@ -119,13 +88,15 @@ maxhp characterSheet =
   let
     (CharacterSheet sheet') = characterSheet
     (Stats stats) = sheet'.stats
-    (Level l) = levelof sheet'.xp
+    (Level l) = level characterSheet
     (Stats totalStats) = totalStats characterSheet
     (Endurance end) = totalStats.end
     hp' = (10 * l) * floor ((toNumber end) * 1.5)
   in
     hp'
 
+level :: CharacterSheet -> Level
+level (CharacterSheet sheet) = levelofExperience sheet.xp
 
 equippedStats :: Equiped -> Array Stats
 equippedStats equiped = itemStatsOrEmpty <$> equipedItems where
@@ -147,36 +118,67 @@ hasItem item (CharacterSheet sheet) =
     Just _ -> true
     Nothing -> false
 
-
+-- How can I use alt to give different error strings
 canEquip :: Equipment -> CharacterSheet -> Boolean
 canEquip item (CharacterSheet sheet) = characterLevel >= req
   where
-    characterLevel = levelof sheet.xp
+    characterLevel = levelofExperience sheet.xp
     req = levelRequirementOf item
 
-equip :: CharacterSheet -> GearSlot -> Equipment -> Either String CharacterSheet
+
+type EquipError = String
+
+equip :: CharacterSheet -> GearSlot -> Equipment -> Either EquipError CharacterSheet
+
+equip character slot item | not $ canEquip item character = 
+  Left $ "You do not meet the level requirement for that item. \n" <> 
+         "You: " <> (show $ level character) <> "\n" <> 
+         "Item: " <> (show $ levelRequirementOf item)
 
 equip (CharacterSheet character) (Head) (Helmet item) = 
-  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (Helmet item)) Head character.equipped }
+  Right $ CharacterSheet $ character { equipped = setItemInSlot Head character.equipped (Helmet item) }
 equip (CharacterSheet character) (Chest) (ChestPlate item) = 
-  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (ChestPlate item)) Chest character.equipped }
+  Right $ CharacterSheet $ character { equipped = setItemInSlot Chest character.equipped (ChestPlate item) }
 equip (CharacterSheet character) (Hands) (Gloves item) = 
-  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (Gloves item)) Hands character.equipped }
+  Right $ CharacterSheet $ character { equipped = setItemInSlot Hands character.equipped (Gloves item) }
 equip (CharacterSheet character) (Leggs) (LeggGuards item) = 
-  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (LeggGuards item)) Leggs character.equipped }
+  Right $ CharacterSheet $ character { equipped = setItemInSlot Leggs character.equipped (LeggGuards item) }
 equip (CharacterSheet character) (Feet) (Shoes item) = 
-  Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (Shoes item)) Feet character.equipped }
+  Right $ CharacterSheet $ character { equipped = setItemInSlot Feet character.equipped (Shoes item) }
 
 equip (CharacterSheet character) (MainHand) item = case item of 
-  (LongSword item') -> 
-    Right $ CharacterSheet $ character { equipped = M.update (\_ -> Just $ Just (LongSword item')) MainHand character.equipped }
-  -- GreatSword -> 
+  LongSword item' -> do
+    Right $ CharacterSheet $ character { equipped = setItemInSlot MainHand character.equipped (LongSword item') }
+  GreatSword item' -> 
+    Right $ CharacterSheet $ character { equipped = setItemInSlot MainHand character.equipped (GreatSword item') # unEquipSlot OffHand }
+  Dagger item' -> 
+    Right $ CharacterSheet $ character { equipped = setItemInSlot MainHand character.equipped (Dagger item') }
+  Bow item' -> 
+    Right $ CharacterSheet $ character { equipped = setItemInSlot MainHand character.equipped (Bow item') # unEquipSlot OffHand }
+  Staff item' -> 
+    Right $ CharacterSheet $ character { equipped = setItemInSlot MainHand character.equipped (Staff item') # unEquipSlot OffHand }
+  _ -> 
+    Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
-  -- Dagger -> 
-
-  -- Bow -> 
-
-  -- Staff -> 
+equip (CharacterSheet character) (OffHand) item = case item of 
+  LongSword item' -> do
+    let 
+      equipped = setItemInSlot OffHand character.equipped (LongSword item')
+      equipped' = case M.lookup MainHand character.equipped  of 
+        Just (Just (GreatSword a)) -> unEquipSlot MainHand equipped
+        Just (Just (Bow a)) -> unEquipSlot MainHand equipped
+        Just (Just (Staff a)) -> unEquipSlot MainHand equipped
+        _ -> equipped
+    Right $ CharacterSheet $ character { equipped = equipped' }    
+  Dagger item' -> do
+    let 
+      equipped = setItemInSlot OffHand character.equipped (Dagger item')
+      equipped' = case M.lookup MainHand character.equipped  of 
+        Just (Just (GreatSword a)) -> unEquipSlot MainHand equipped
+        Just (Just (Bow a)) -> unEquipSlot MainHand equipped
+        Just (Just (Staff a)) -> unEquipSlot MainHand equipped
+        _ -> equipped
+    Right $ CharacterSheet $ character { equipped = equipped' }    
   _ -> 
     Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
@@ -184,22 +186,10 @@ equip (CharacterSheet character) (MainHand) item = case item of
 equip character slot item = 
   Left $ "Cannot equip " <> show item <> " in slot: " <> show slot
 
-unEquip :: CharacterSheet -> GearSlot -> CharacterSheet
-unEquip (CharacterSheet character) slot =
-  CharacterSheet $ character { equipped = M.update (\_ -> Just $ Nothing) slot character.equipped }
--- unEquip :: Item -> CharacterSheet -> Either String CharacterSheet
--- unEquip item (CharacterSheet sheet) =
---   case item of 
---     (sheet.equipped.helmet) -> Left "lol" 
---     -- "helmet"  ->
---     --   Right $ CharacterSheet $ sheet { equipped = equipped { helmet = Nothing } }
---     -- "chest"  -> 
---     --   Right $ CharacterSheet $ sheet { equipped = equipped { chest = Nothing } }
---     -- "hands"  -> 
---     --   Right $ CharacterSheet $ sheet { equipped = equipped { hands = Nothing } }
---     -- "leggs"  -> 
---     --   Right $ CharacterSheet $ sheet { equipped = equipped { leggs = Nothing } }
---     -- "feet"  -> 
---     --   Right $ CharacterSheet $ sheet { equipped = equipped { feet = Nothing } }
---     -- _ ->
---     --   Tuple Nothing sheet
+setItemInSlot :: GearSlot -> Equiped -> Equipment -> Equiped
+setItemInSlot slot equiped equipmentConstructor = 
+  M.update (\_ -> Just $ Just (equipmentConstructor)) slot equiped
+
+unEquipSlot :: GearSlot -> Equiped -> Equiped
+unEquipSlot slot equiped =
+  M.update (\_ -> Just $ Nothing) slot equiped

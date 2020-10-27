@@ -36,8 +36,8 @@ unLevel (Level l) = l
 levels :: List Int
 levels = map (\b -> floor $ (toNumber b) * (1.0 + (toNumber b) * 2.0)) (1..60)
 
-levelof :: Experience -> Level
-levelof (Experience xp) =
+levelofExperience :: Experience -> Level
+levelofExperience (Experience xp) =
   let 
     levels' = levels
     level' = (+) 1 $ fromMaybe ((-) (length levels') 1) (findIndex (\minxp -> minxp > xp) levels')

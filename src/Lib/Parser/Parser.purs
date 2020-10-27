@@ -2,63 +2,125 @@ module Lib.Parser where
 
 import Prelude
 
+import Control.Alt (class Alt, (<|>))
+import Control.Alternative (class Alternative)
+import Control.Lazy (class Lazy)
+import Control.Plus (class Plus)
 import Data.Array (foldl, fromFoldable, toUnfoldable)
-import Data.Char (toCharCode)
-import Data.List (List(..), (:))
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Either (Either(..))
+import Data.List (List(..), many, (:), some)
 import Data.String.CodeUnits (fromCharArray, toCharArray)
-import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class.Console (logShow)
-
-  
-data JsonValue
-  = JsonNull
-  | JsonBool Boolean
-  | JsonNumber Number
-  | JsonString String
-  | JsonArray (Array JsonValue)
-  | JsonObject (Array (Tuple String JsonValue))
+import Data.Char.Unicode (isLetter)
 
 
-data Parser a = Parser (String -> Maybe (Tuple String a))
+data Parser a = Parser (String -> Either ParserError (Tuple a String))
+
+newtype ParserError = ParserError String
+derive newtype instance showParserError:: Show ParserError
+
+runParser :: 
+  forall a. Parser a 
+  -> String 
+  -> Either ParserError (Tuple a String)
+runParser (Parser p) s = p s
 
 instance functorParser :: Functor Parser where
-  map f (Parser a) = Parser b
-    where
-      b str = do
-        (Tuple xs x) <- a str
-        Just (Tuple xs (f x))
+  map f p = Parser \s -> case runParser p s of 
+    Right (Tuple x xs) -> Right $ Tuple (f x) xs
+    Left error -> Left error
 
-instance applyParser :: Apply Parser where
-  apply (Parser p1) (Parser p2) = Parser \input -> do
-    (Tuple input' f) <- p1 input
-    (Tuple input'' a) <- p2 input'
-    Just (Tuple input'' (f a))
+instance applyParser :: (Functor Parser) => Apply Parser where
+  apply fg f = Parser \s -> case runParser fg s of 
+    Right (Tuple x xs) -> case runParser f xs of 
+      Right (Tuple v vs) -> Right $ Tuple (x v) vs
+      Left error -> Left error
+    Left error -> Left error
 
-instance applicativeParser :: Applicative Parser where
-  pure x = Parser (\str -> Just (Tuple str x))
+instance applicativeParser :: (Apply Parser) => Applicative Parser where
+  pure x = Parser \s -> Right $ Tuple x s
 
-parse :: forall a. String -> Parser a -> Maybe (Tuple String a)
-parse str (Parser f) = f str
+instance bindParser :: (Apply Parser) => Bind Parser where
+  --bind :: forall a b. m a -> (a -> m b) -> m b
+  bind m g = Parser \s -> case runParser m s of 
+    Right (Tuple x xs) -> runParser (g x) xs
+    Left error -> Left error
 
-l :: forall a. List a -> List a
-l a = a
+instance monadParser :: (Bind Parser) => Monad Parser
 
-charP :: Char -> Parser Char
-charP x = Parser (toCharArray >>> toUnfoldable >>> f)
+instance altParser :: (Functor Parser) => Alt Parser where
+  alt a b = Parser \s -> case runParser a s of 
+    Right r -> Right r
+    Left _ -> runParser b s
+
+instance plusParser :: (Alt Parser) => Plus Parser where
+  empty = fail
+
+instance alternativeParser :: (Alt Parser, Plus Parser) => Alternative Parser
+
+instance lazyParser :: Lazy (Parser (List a)) where
+  defer f = Parser \s -> runParser (f unit) s
+
+toChars :: String -> List Char
+toChars = toCharArray >>> toUnfoldable
+
+fromChars :: List Char -> String
+fromChars =  fromFoldable >>> fromCharArray
+
+fail :: forall a. Parser a
+fail = Parser \_ -> Left $ ParserError "Parsing failed."
+
+anyChar :: Parser Char
+anyChar = Parser (toChars >>> f)
   where
-    f (y:ys)
-      | y == x = Just (Tuple (foldl (\acc s -> acc <> fromCharArray [s]) "" ys) x)
-      | otherwise = Nothing
-    f Nil = Nothing
+    f (x:xs) = Right (Tuple x (foldl (\acc s -> acc <> fromCharArray [s]) "" xs))
+    f Nil = Left $ ParserError ("Cannot parse empty charlist")
 
--- stringP :: String -> Parser String
--- stringP str = sequence (map charP str)
+ternary :: (Char -> Boolean) -> Parser Char
+ternary pred = do
+  c <- anyChar 
+  if pred c then pure c else fail
+
+char :: Char -> Parser Char
+char x = ternary ((==) x)
+
+string :: String -> Parser String
+string s = 
+  fromChars <$> case toChars s of 
+    Nil -> pure Nil
+    (x:xs) -> do 
+      _ <- char x
+      _ <- string $ fromChars xs
+      pure $ Cons x xs
+
+anyLetter :: Parser String
+anyLetter = do
+  s <- many $ ternary isLetter
+  pure $ fromChars s
+
+anySpace :: Parser Unit
+anySpace = do
+  _ <- many $ char ' '
+  pure unit
+
+someSpace :: Parser Unit
+someSpace = do
+  _ <- some $ char ' '
+  pure unit
+
+letStatement :: Parser (Array String)
+letStatement = do
+  declare <- string "let"
+  _ <- someSpace
+  name <- anyLetter
+  _ <- someSpace
+  _ <- string "="
+  _ <- someSpace
+  value <- anyLetter
+  pure [name, value]
 
 main :: Effect Unit
 main = do
-  let charA = charP 'a'
-  let charAInt = map (\c -> toCharCode c) charA
-  logShow $ parse "aasd" charAInt
+  logShow $ runParser (letStatement) ""

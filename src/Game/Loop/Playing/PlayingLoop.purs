@@ -2,9 +2,7 @@ module Game.Loop.Playing.PlayingLoop where
 
 import Prelude
 
-import Data.Character (unEquip)
 import Data.Dialogue (Dialogue)
-import Data.Either (Either(..))
 import Data.Location (Location(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -34,14 +32,6 @@ playing state input = do
     [":c"] -> do 
       log $ show state.character
       playing state []
-    [":une", itemSlot] -> do
-      case unEquip itemSlot state.character of 
-        Right sheet -> do
-          let newState = state {character = sheet}
-          playing newState []
-        Left error -> do
-          log error
-          playing state []
     ["talk"] -> do
       liftEngine $ dialogue state testDialogue 1
     ["look"] -> do
