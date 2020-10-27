@@ -7,16 +7,16 @@ import Control.Alternative (class Alternative)
 import Control.Lazy (class Lazy)
 import Control.Plus (class Plus)
 import Data.Array (foldl, fromFoldable, toUnfoldable)
-import Data.Char.Unicode (isLetter, isSpace)
+import Data.Char.Unicode (isSpace)
 import Data.Either (Either(..))
 import Data.List (List(..), many, (:), some)
 import Data.String.CodeUnits (fromCharArray, toCharArray)
 import Data.Tuple (Tuple(..))
 
-
 data Parser a = Parser (String -> Either ParserError (Tuple a String))
 
 newtype ParserError = ParserError String
+
 derive newtype instance showParserError:: Show ParserError
 derive newtype instance eqParserError:: Eq ParserError
 
@@ -80,7 +80,8 @@ anyChar = Parser (toChars >>> f)
 ternary :: (Char -> Boolean) -> Parser Char
 ternary pred = do
   c <- anyChar 
-  if pred c then pure c else fail
+  if pred c then pure c 
+  else fail
 
 char :: Char -> Parser Char
 char x = ternary ((==) x)
