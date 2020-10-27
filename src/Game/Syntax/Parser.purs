@@ -3,6 +3,7 @@ module Game.Syntax.Parser where
 import Prelude
 
 import Control.Alt ((<|>))
+import Data.Traversable (sequence, traverse_)
 import Effect (Effect)
 import Effect.Class.Console (logShow)
 import Game.Syntax.Spec (Expression(..), PlayerAction(..))
@@ -13,9 +14,7 @@ actionParser = move <|> take
 
 move:: Parser PlayerAction
 move = do
-  _ <- anySpace
-  _ <- string "move"
-  _ <- (string " to ") <|> someSpace
+  _ <- sequence [anySpace, string "move", (string " to ") <|> someSpace]
   whereTo <- finiteString
   pure $ Move whereTo
 
@@ -24,23 +23,17 @@ take = takeItemFrom <|> takeItem
 
 takeItem :: Parser PlayerAction
 takeItem = do
-  _ <- anySpace
-  _ <- string "take"
-  _ <- someSpace
+  _ <- sequence [anySpace, string "take", someSpace]
   itemName <- finiteString
   pure $ Take itemName
 
 takeItemFrom:: Parser PlayerAction
 takeItemFrom = do
-  _ <- anySpace
-  _ <- string "take"
-  _ <- someSpace
-  itemName <- finiteString
-  _ <- someSpace
-  _ <- string "from"
-  _ <- someSpace
-  fromWhere <- finiteString
-  pure $ TakeFrom itemName fromWhere
+  _ <- sequence [anySpace, string "take", someSpace]
+  item <- finiteString
+  _ <- sequence [anySpace, string "from", someSpace]
+  from <- finiteString
+  pure $ TakeItemFrom item from
 
 expressionParser :: Parser Expression
 expressionParser = load <|> save <|> turn
@@ -68,4 +61,5 @@ turn = do
 
 main :: Effect Unit
 main = do
-  logShow $ runParser (expressionParser) "load game"
+  logShow $ runParser (expressionParser) "move to north"
+    --logShow $ runParser (sequence [string "foo", string "bar"]) "foobar"

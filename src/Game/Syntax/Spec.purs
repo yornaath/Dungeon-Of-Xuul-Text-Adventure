@@ -8,7 +8,9 @@ import Data.Generic.Rep.Show (genericShow)
 data PlayerAction = 
     Move String
   | Take String
-  | TakeFrom String String
+  | TakeItemFrom String String
+  | Look
+  | Inspect String
 
 derive instance genericPlayerAction:: Generic PlayerAction _
 
