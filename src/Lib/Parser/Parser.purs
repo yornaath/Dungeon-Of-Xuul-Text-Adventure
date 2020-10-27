@@ -7,7 +7,7 @@ import Control.Alternative (class Alternative)
 import Control.Lazy (class Lazy)
 import Control.Plus (class Plus)
 import Data.Array (foldl, fromFoldable, toUnfoldable)
-import Data.Char.Unicode (isLetter)
+import Data.Char.Unicode (isLetter, isSpace)
 import Data.Either (Either(..))
 import Data.List (List(..), many, (:), some)
 import Data.String.CodeUnits (fromCharArray, toCharArray)
@@ -18,6 +18,7 @@ data Parser a = Parser (String -> Either ParserError (Tuple a String))
 
 newtype ParserError = ParserError String
 derive newtype instance showParserError:: Show ParserError
+derive newtype instance eqParserError:: Eq ParserError
 
 runParser :: 
   forall a. Parser a 
@@ -84,28 +85,28 @@ ternary pred = do
 char :: Char -> Parser Char
 char x = ternary ((==) x)
 
-string :: String -> Parser String
-string s = 
+literal :: String -> Parser String
+literal s = 
   fromChars <$> case toChars s of 
     Nil -> pure Nil
     (x:xs) -> do 
       _ <- char x
-      _ <- string $ fromChars xs
+      _ <- literal $ fromChars xs
       pure $ Cons x xs
 
 finiteString :: Parser String
 finiteString = do
-  s <- many $ ternary isLetter
+  s <- many $ ternary (isSpace >>> not)
   pure $ fromChars s
 
 anySpace :: Parser String
 anySpace = do
-  spaces' <- many $ char ' '
+  spaces' <- many $ ternary isSpace
   pure $ fromChars spaces'
 
 someSpace :: Parser String
 someSpace = do
-  spaces' <- some $ char ' '
+  spaces' <- some $ ternary isSpace
   pure $ fromChars spaces'
 
 -- optional :: forall a. Parser a -> Parser a

@@ -18,6 +18,7 @@ You can edit this file as you like.
   , "psci-support"
   , "queue"
   , "random"
+  , "test-unit"
   , "unicode"
   , "yargs"
   , "zeta"
