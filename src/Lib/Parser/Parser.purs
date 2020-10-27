@@ -11,7 +11,6 @@ import Data.Char.Unicode (isSpace)
 import Data.Either (Either(..))
 import Data.List (List(..), many, (:), some)
 import Data.String.CodeUnits (fromCharArray, toCharArray)
-import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
 
 data Parser a = Parser (String -> Either ParserError (Tuple a String))
