@@ -1,4 +1,4 @@
-module Data.Role where
+module Game.Data.Role where
   
 import Prelude
 

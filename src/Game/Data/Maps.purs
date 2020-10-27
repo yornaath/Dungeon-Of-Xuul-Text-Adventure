@@ -1,7 +1,7 @@
-module Data.Maps where
+module Game.Data.Maps where
 
 import Data.List (List(..), (:))
-import Data.Location (Exit(..), Location(..))
+import Game.Data.Location (Exit(..), Location(..))
   
 dungeonOfXul :: Location
 dungeonOfXul = Location {

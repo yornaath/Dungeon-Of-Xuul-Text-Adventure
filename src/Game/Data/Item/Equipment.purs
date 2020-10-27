@@ -1,4 +1,4 @@
-module Data.Item.Equipment where
+module Game.Data.Item.Equipment where
 
 import Prelude
 
@@ -6,11 +6,11 @@ import Data.Argonaut.Decode (class DecodeJson)
 import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
-import Data.Experience (Level)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Eq (genericEq)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Stats (Stats)
+import Game.Data.Experience (Level)
+import Game.Data.Stats (Stats)
 
 
 data Equipment = 

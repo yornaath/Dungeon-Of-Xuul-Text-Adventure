@@ -4,7 +4,7 @@ import Prelude
 
 import Components.Utils (css)
 import Data.Array (fromFoldable)
-import Data.Die (Die, allDies)
+import Game.Data.Die (Die, allDies)
 import Data.List (List(..), delete, snoc)
 import Data.Maybe (Maybe(..))
 import Data.Symbol (SProxy(..))

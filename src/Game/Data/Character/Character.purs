@@ -1,4 +1,4 @@
-module Data.Character where
+module Game.Data.Character where
 
 import Prelude
 
@@ -7,18 +7,20 @@ import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Array (fromFoldable)
-import Data.Character.GearSlot (GearSlot(..))
+
 import Data.Either (Either(..))
-import Data.Experience (Experience, Level(..), levelofExperience)
+
 import Data.Foldable (find)
 import Data.Generic.Rep (class Generic)
 import Data.Int (floor, toNumber)
-import Data.Item.Equipment (Equipment(..), levelRequirementOf, statsOf)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Role (Role)
-import Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats, total)
 import Data.Tuple (Tuple(..))
+import Game.Data.Role (Role)
+import Game.Data.Character.GearSlot (GearSlot(..))
+import Game.Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats, total)
+import Game.Data.Experience (Experience, Level(..), levelofExperience)
+import Game.Data.Item.Equipment (Equipment(..), levelRequirementOf, statsOf)
 
 data CharacterSheet = CharacterSheet 
   { name        :: String,

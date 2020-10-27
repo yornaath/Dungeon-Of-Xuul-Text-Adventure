@@ -1,4 +1,4 @@
-module Data.Die where
+module Game.Data.Die where
 
 import Prelude
 

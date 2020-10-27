@@ -2,15 +2,15 @@ module Game.Loop.CharacterCreation where
   
 import Prelude
 
-import Data.Character (mkCharacterSheet)
-import Data.Die (d20, tossDies)
-import Data.Experience (Experience(..))
+import Game.Data.Character (mkCharacterSheet)
+import Game.Data.Die (d20, tossDies)
+import Game.Data.Experience (Experience(..))
 import Data.Int (fromString)
 import Data.List (List(..), foldl, (:))
-import Data.Maps (dungeonOfXul)
+import Game.Data.Maps (dungeonOfXul)
 import Data.Maybe (Maybe(..))
-import Data.Role (Role(..))
-import Data.Stats (Stats, mkStats)
+import Game.Data.Role (Role(..))
+import Game.Data.Stats (Stats, mkStats)
 import Data.String (toLower)
 import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))

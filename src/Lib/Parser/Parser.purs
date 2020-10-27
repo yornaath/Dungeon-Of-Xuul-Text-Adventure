@@ -2,18 +2,16 @@ module Lib.Parser where
 
 import Prelude
 
-import Control.Alt (class Alt, (<|>))
+import Control.Alt (class Alt)
 import Control.Alternative (class Alternative)
 import Control.Lazy (class Lazy)
 import Control.Plus (class Plus)
 import Data.Array (foldl, fromFoldable, toUnfoldable)
+import Data.Char.Unicode (isLetter)
 import Data.Either (Either(..))
 import Data.List (List(..), many, (:), some)
 import Data.String.CodeUnits (fromCharArray, toCharArray)
 import Data.Tuple (Tuple(..))
-import Effect (Effect)
-import Effect.Class.Console (logShow)
-import Data.Char.Unicode (isLetter)
 
 
 data Parser a = Parser (String -> Either ParserError (Tuple a String))
@@ -95,32 +93,21 @@ string s =
       _ <- string $ fromChars xs
       pure $ Cons x xs
 
-anyLetter :: Parser String
-anyLetter = do
+finiteString :: Parser String
+finiteString = do
   s <- many $ ternary isLetter
   pure $ fromChars s
 
-anySpace :: Parser Unit
+anySpace :: Parser String
 anySpace = do
-  _ <- many $ char ' '
-  pure unit
+  spaces' <- many $ char ' '
+  pure $ fromChars spaces'
 
-someSpace :: Parser Unit
+someSpace :: Parser String
 someSpace = do
-  _ <- some $ char ' '
-  pure unit
+  spaces' <- some $ char ' '
+  pure $ fromChars spaces'
 
-letStatement :: Parser (Array String)
-letStatement = do
-  declare <- string "let"
-  _ <- someSpace
-  name <- anyLetter
-  _ <- someSpace
-  _ <- string "="
-  _ <- someSpace
-  value <- anyLetter
-  pure [name, value]
-
-main :: Effect Unit
-main = do
-  logShow $ runParser (letStatement) ""
+-- optional :: forall a. Parser a -> Parser a
+-- optional try = Parser \s -> case runParser try s of 
+--   Right (Tuple x xs) -> try

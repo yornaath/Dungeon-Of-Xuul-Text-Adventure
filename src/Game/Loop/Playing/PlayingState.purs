@@ -1,7 +1,7 @@
 module Game.Loop.Playing.PlayingState where
 
-import Data.Character (CharacterSheet)
-import Data.Location (Location)
+import Game.Data.Character (CharacterSheet)
+import Game.Data.Location (Location)
 
 type PlayingState = {
   turn :: Int,

@@ -1,4 +1,4 @@
-module Data.Experience where
+module Game.Data.Experience where
   
 import Prelude
 

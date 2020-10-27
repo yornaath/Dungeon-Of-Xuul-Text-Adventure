@@ -1,4 +1,4 @@
-module Data.Location where
+module Game.Data.Location where
   
 import Prelude
 

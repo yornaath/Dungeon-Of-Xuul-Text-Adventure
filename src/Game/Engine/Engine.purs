@@ -6,13 +6,11 @@ import Control.Monad.RWS (asks)
 import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either(..))
 import Data.List as L
-import Data.Maybe (Maybe(..))
 import Data.String (Pattern(..), split)
-import Data.Traversable (for_, sequence)
+import Data.Traversable (for_)
 import Effect.Aff (Aff, makeAff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Console as Console
 import Engine.Environment (Environment)
 import Queue as Q
 import Type.Equality (class TypeEquals, from)

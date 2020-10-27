@@ -4,8 +4,8 @@ import Prelude
 
 import Data.Array (foldl, mapWithIndex)
 import Data.Array as A
-import Data.Character (CharacterSheet(..))
-import Data.Dialogue (Dialogue, Reply, ChoicePoint)
+import Game.Data.Character (CharacterSheet(..))
+import Game.Data.Dialogue (Dialogue, Reply, ChoicePoint)
 import Data.Int (fromString)
 import Data.Map as M
 import Data.Maybe (Maybe(..))

@@ -4,7 +4,7 @@ import Prelude
 
 import Components.DieSelector (DieSelectorOutput, DieSelectorQuery(..), DieSelectorSlot, _dieselector, dieSelector)
 import Components.Utils (css)
-import Data.Die (sumDies, tossDies)
+import Game.Data.Die (sumDies, tossDies)
 import Data.List (List(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Class (class MonadEffect, liftEffect)

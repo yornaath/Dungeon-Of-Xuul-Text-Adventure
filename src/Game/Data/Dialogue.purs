@@ -1,4 +1,4 @@
-module Data.Dialogue where
+module Game.Data.Dialogue where
 
 import Data.Map (Map)
 import Data.Maybe (Maybe)

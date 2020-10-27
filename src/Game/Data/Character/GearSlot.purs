@@ -1,4 +1,4 @@
-module Data.Character.GearSlot where
+module Game.Data.Character.GearSlot where
 
 import Prelude
 

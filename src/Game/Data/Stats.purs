@@ -1,4 +1,4 @@
-module Data.Stats where
+module Game.Data.Stats where
 
 import Prelude
 
@@ -10,7 +10,6 @@ import Data.Foldable (foldl)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Eq (genericEq)
 import Data.Generic.Rep.Show (genericShow)
-import Data.List (List)
 import Data.Newtype (class Newtype)
 
 newtype Agility = Agility Int

@@ -2,8 +2,8 @@ module Game.Loop.Playing.PlayingLoop where
 
 import Prelude
 
-import Data.Dialogue (Dialogue)
-import Data.Location (Location(..))
+import Game.Data.Dialogue (Dialogue)
+import Game.Data.Location (Location(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
