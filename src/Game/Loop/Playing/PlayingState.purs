@@ -25,15 +25,8 @@ type DialogueState = GlobalGameState ()
 
 data PlayingState 
   = Exploration ExplorationState
-  | Combat CombatState
-  | Dialogue DialogueState
-
-getCharacter :: PlayingState -> CharacterSheet
-getCharacter state =
-  case state of 
-    Exploration s -> s.character
-    Combat s -> s.character
-    Dialogue s -> s.character
+  | CombatMode CombatState
+  | DialogueMode DialogueState
 
 derive instance genericPlayingState:: Generic PlayingState _
 

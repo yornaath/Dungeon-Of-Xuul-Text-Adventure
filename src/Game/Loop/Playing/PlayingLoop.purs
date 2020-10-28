@@ -17,52 +17,59 @@ import Game.Data.Dialogue (Dialogue)
 import Game.Data.Location (Location(..))
 import Game.Engine (Engine, liftEngine, log, prompt)
 import Game.GameState (GameState(..))
-import Game.Loop.Playing.PlayingState (PlayingState(..), getCharacter)
+import Game.Loop.Playing.PlayingState (ExplorationState, PlayingState(..))
 import Game.Syntax.Parser (expressionParser)
 import Game.Syntax.Spec (Expression(..), PlayerAction(..))
 import Lib.Parser (runParser)
 
 playing :: PlayingState -> PlayerAction -> Engine GameState
 playing state action = do
-  case action of
+  case state of 
+    Exploration exploringState -> do 
+      explorationLoop exploringState action
+    CombatMode _ -> do
+        log "[Combat not yet supported]"
+        playing state Idle
+    DialogueMode _ -> do
+        log "[Dialogue not yet supported]"
+        playing state Idle
 
+explorationLoop :: ExplorationState -> PlayerAction -> Engine GameState
+explorationLoop state action = 
+  case action of
     Idle -> do 
       input' <- prompt
       case runParser expressionParser input' of 
         Left error -> do 
           liftEffect $ Console.log $ show error
           log "I dont understand that command."
-          playing state Idle
+          explorationLoop state Idle
         Right (Tuple action' _) -> do
           case action' of 
             Save saveName -> do
-              saved <- liftAff $ saveGame saveName (Playing state)
+              saved <- liftAff $ saveGame saveName (Playing $ Exploration state)
               log "Game saved."
-              playing state Idle
+              explorationLoop state Idle
             Load saveName -> do 
               loadedState <- liftAff $ loadGame saveName
               pure loadedState
             Exit -> do
               pure (MainMenu)
             (Action playerAction) -> do
-              playing state playerAction
+              explorationLoop state playerAction
 
     Look -> do
-      case state of 
-        Exploration exploringState -> do 
-          let (Location loc) = exploringState.location
-          log $ loc.description <> "\n"
-          playing state Idle
-        _ -> do
-          playing state Idle
+      let (Location loc) = state.location
+      log $ loc.description <> "\n"
+      explorationLoop state Idle
 
     OpenCharacterSheet -> do
-      log $ show $ getCharacter state
-      playing state Idle
+      log $ show $ state.character
+      explorationLoop state Idle
 
     _ -> do
       log "I dont understand that command."
-      playing state Idle
+      explorationLoop state Idle
   -- case input of
   --   ["help"] -> do
   --     log ":save savename     -- Save a game by its name"
