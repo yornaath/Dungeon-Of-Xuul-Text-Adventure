@@ -28,13 +28,6 @@ data PlayingState
   | CombatMode CombatState
   | DialogueMode DialogueState
 
-getCharacter :: PlayingState -> CharacterSheet
-getCharacter playingState = 
-  case playingState of 
-    Exploration s' -> s'.character
-    CombatMode s' -> s'.character
-    DialogueMode s' -> s'.character
-
 derive instance genericPlayingState:: Generic PlayingState _
 
 instance showPlayingState :: Show PlayingState where
@@ -48,6 +41,13 @@ instance encodePlayingState :: EncodeJson PlayingState where
 
 instance decodePlayingState :: DecodeJson PlayingState where
   decodeJson a = genericDecodeJson a
+
+getCharacter :: PlayingState -> CharacterSheet
+getCharacter playingState = 
+  case playingState of 
+    Exploration s' -> s'.character
+    CombatMode s' -> s'.character
+    DialogueMode s' -> s'.character
 
 startGame :: CharacterSheet -> Location -> PlayingState
 startGame character location = Exploration {
