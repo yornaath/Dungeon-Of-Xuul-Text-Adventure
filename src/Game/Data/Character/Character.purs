@@ -7,20 +7,19 @@ import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Array (fromFoldable)
-
 import Data.Either (Either(..))
-
 import Data.Foldable (find)
 import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Eq (genericEq)
 import Data.Int (floor, toNumber)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Game.Data.Role (Role)
 import Game.Data.Character.GearSlot (GearSlot(..))
-import Game.Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats, total)
 import Game.Data.Experience (Experience, Level(..), levelofExperience)
 import Game.Data.Item.Equipment (Equipment(..), levelRequirementOf, statsOf)
+import Game.Data.Role (Role)
+import Game.Data.Stats (Endurance(..), Stats(..), emptyStats, mkStats, total)
 
 data CharacterSheet = CharacterSheet 
   { name        :: String,
@@ -60,6 +59,9 @@ instance encodeJsonCharacterSheet :: EncodeJson CharacterSheet where
 
 instance decodeJsonCharacterSheet :: DecodeJson CharacterSheet where
   decodeJson a = genericDecodeJson a
+
+instance eqCharacterSheet :: Eq CharacterSheet where
+  eq a = genericEq a
 
 
 mkCharacterSheet :: String -> Role -> Stats -> Experience -> CharacterSheet

@@ -10,6 +10,7 @@ data Expression =
     Load String
   | Save String
   | Action PlayerAction
+  | Exit
 
 derive instance genericExpression:: Generic Expression _
 
@@ -19,14 +20,16 @@ instance showExpression :: Show Expression where
 instance eqExpression :: Eq Expression where
   eq = genericEq
 
-data PlayerAction = 
-    Move String
+data PlayerAction 
+  = Idle 
+  | Move String
   | Look
   | Inspect String
   | Take String
   | TakeItemFrom String String
-  | Combat CombatTurn
   | Consume String
+  | Combat CombatTurn
+  | Dialogue DialogueTurn
 
 derive instance genericPlayerAction:: Generic PlayerAction _
 
@@ -35,6 +38,7 @@ instance showPlayerAction :: Show PlayerAction where
 
 instance eqPlayerAction :: Eq PlayerAction where
   eq = genericEq
+
 
 data CombatTurn = 
     Attack String
@@ -47,4 +51,16 @@ instance showCombatTurn:: Show CombatTurn where
   show = genericShow
 
 instance eqCombatTurn :: Eq CombatTurn where
+  eq = genericEq
+
+
+data DialogueTurn =
+  Answer String 
+
+derive instance genericDialogueTurn:: Generic DialogueTurn _
+
+instance showDialogueTurn:: Show DialogueTurn where
+  show = genericShow
+
+instance eqDialogueTurn :: Eq DialogueTurn where
   eq = genericEq

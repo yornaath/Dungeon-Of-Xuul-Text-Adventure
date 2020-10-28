@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Alt ((<|>))
 import Data.Traversable (sequence)
-import Game.Syntax.Spec (CombatTurn(..), Expression(..), PlayerAction(..))
+import Game.Syntax.Spec (CombatTurn(..), DialogueTurn(..), Expression(..), PlayerAction(..))
 import Lib.Parser (Parser, anySpace, finiteString, literal, someSpace)
 
 --
@@ -12,7 +12,11 @@ import Lib.Parser (Parser, anySpace, finiteString, literal, someSpace)
 --
 
 expressionParser :: Parser Expression
-expressionParser = load <|> save <|> (Action <$> actionParser)
+expressionParser 
+  =   load 
+  <|> save
+  <|> exit
+  <|> (Action <$> actionParser)
 
 load :: Parser Expression
 load = do
@@ -28,7 +32,15 @@ save = do
   _ <- literal "save"
   _ <- someSpace
   saveGame <- finiteString
-  pure (Load saveGame)
+  pure (Save saveGame)
+
+exit :: Parser Expression
+exit = do
+  _ <- anySpace
+  _ <- literal ":exit"
+  _ <- someSpace
+  saveGame <- finiteString
+  pure Exit
 
 
 
@@ -37,13 +49,26 @@ save = do
 --
 
 actionParser :: Parser PlayerAction 
-actionParser = move <|> consume <|> take <|> (Combat <$> combatParser)
+actionParser 
+  =   move
+  <|> look
+  <|> consume 
+  <|> take 
+  <|> (Combat <$> combatParser) 
+  <|> (Dialogue <$> dialogueParser)
 
 move :: Parser PlayerAction
 move = do
   _ <- sequence [anySpace, literal "move", (literal " to ") <|> someSpace]
   whereTo <- finiteString
   pure $ Move whereTo
+
+look :: Parser PlayerAction
+look = do
+  _ <- anySpace
+  _ <- literal "look"
+  _ <- anySpace
+  pure $ Look
 
 take :: Parser PlayerAction
 take = takeItemFrom <|> takeItem
@@ -77,7 +102,10 @@ takeItemFrom = do
 --
 
 combatParser :: Parser CombatTurn
-combatParser = attack <|> cast <|> defend
+combatParser 
+  =   attack 
+  <|> cast 
+  <|> defend
 
 attack :: Parser CombatTurn
 attack = do
@@ -101,3 +129,19 @@ defend = do
   _ <- (literal "defend")
   _ <- anySpace
   pure $ Defend
+
+
+--
+-- Dialogue Actions parser
+--
+
+dialogueParser :: Parser DialogueTurn
+dialogueParser = answer
+
+answer :: Parser DialogueTurn
+answer = do
+  _ <- anySpace
+  _ <- literal "answer:"
+  _ <- someSpace
+  answer' <- finiteString
+  pure $ Answer answer'

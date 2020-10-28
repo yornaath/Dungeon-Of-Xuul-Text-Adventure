@@ -7,6 +7,7 @@ import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Eq (genericEq)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
 import Data.String (toLower)
@@ -28,6 +29,9 @@ derive instance genericRole:: Generic Role _
 
 instance showRole :: Show Role where
   show = genericShow
+
+instance eqRole :: Eq Role where
+  eq a = genericEq a
 
 instance encodeJsonRole :: EncodeJson Role where
   encodeJson a = genericEncodeJson a

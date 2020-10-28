@@ -14,37 +14,37 @@ import Game.Engine (Engine, log, prompt)
 import Game.GameState (GameState(..))
 import Game.Loop.Playing.PlayingState (PlayingState)
 
-dialogue :: PlayingState -> Dialogue -> Int -> Engine GameState
-dialogue state dialogue' index = do
-  let (CharacterSheet {name}) = state.character
-  case M.lookup index dialogue' of 
-    (Just choicePoint) -> do
-      log $ renderChoicePoint choicePoint
-      reply <- askForReply choicePoint
-      log $ name <> ": “" <> reply.text <> "”\n"
-      case reply.next of 
-        (Just nextIndex) -> do 
-          dialogue (state { turn = state.turn + 1}) dialogue' nextIndex
-        (Nothing) -> do
-          log $ "[dialogue ended]\n"
-          pure (Playing state)
-    _ -> do
-      pure (Playing state)
+-- dialogue :: PlayingState -> Dialogue -> Int -> Engine GameState
+-- dialogue state dialogue' index = do
+--   let (CharacterSheet {name}) = state.character
+--   case M.lookup index dialogue' of 
+--     (Just choicePoint) -> do
+--       log $ renderChoicePoint choicePoint
+--       reply <- askForReply choicePoint
+--       log $ name <> ": “" <> reply.text <> "”\n"
+--       case reply.next of 
+--         (Just nextIndex) -> do 
+--           dialogue (state { turn = state.turn + 1}) dialogue' nextIndex
+--         (Nothing) -> do
+--           log $ "[dialogue ended]\n"
+--           pure (Playing state)
+--     _ -> do
+--       pure (Playing state)
 
-askForReply :: ChoicePoint -> Engine Reply 
-askForReply (Tuple text replies) = do
-  input <- prompt
-  case fromString input of 
-    (Just index) -> do
-      let reply = A.index replies (index - 1)
-      case reply of 
-        (Just reply') -> do 
-          pure reply'
-        (Nothing) -> do
-          log "Not a valid choice. \n"
-          askForReply (Tuple text replies)
-    _ -> do
-      askForReply (Tuple text replies)
+-- askForReply :: ChoicePoint -> Engine Reply 
+-- askForReply (Tuple text replies) = do
+--   input <- prompt
+--   case fromString input of 
+--     (Just index) -> do
+--       let reply = A.index replies (index - 1)
+--       case reply of 
+--         (Just reply') -> do 
+--           pure reply'
+--         (Nothing) -> do
+--           log "Not a valid choice. \n"
+--           askForReply (Tuple text replies)
+--     _ -> do
+--       askForReply (Tuple text replies)
 
 renderChoicePoint :: ChoicePoint -> String
 renderChoicePoint (Tuple text replies) =

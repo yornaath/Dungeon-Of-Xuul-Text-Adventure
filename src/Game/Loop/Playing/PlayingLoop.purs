@@ -1,49 +1,89 @@
 module Game.Loop.Playing.PlayingLoop where
 
+import Game.Loop.Playing.Dialogue.DialogueLoop
 import Prelude
 
-import Game.Data.Dialogue (Dialogue)
-import Game.Data.Location (Location(..))
+import Data.Either (Either(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
 import Data.String (split)
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (liftAff)
-import Engine.SaveGames (saveGame)
+import Effect.Class (liftEffect)
+import Effect.Console as Console
+import Engine.SaveGames (saveGame, loadGame)
+import Game.Data.Dialogue (Dialogue)
+import Game.Data.Location (Location(..))
 import Game.Engine (Engine, liftEngine, log, prompt)
 import Game.GameState (GameState(..))
-import Game.Loop.Playing.Dialogue.DialogueLoop (dialogue)
-import Game.Loop.Playing.PlayingState (PlayingState)
+import Game.Loop.Playing.PlayingState (PlayingState(..))
+import Game.Syntax.Parser (expressionParser)
+import Game.Syntax.Spec (Expression(..), PlayerAction(..))
+import Lib.Parser (runParser)
 
-playing :: PlayingState -> Array String -> Engine GameState
-playing state input = do
-  case input of
-    ["help"] -> do
-      log ":save savename     -- Save a game by its name"
-      log ":exit              -- Exit to main menu"
-      log ":c                 -- Inspect character \n"
-      playing state []
-    [":exit"] -> do
-      pure (MainMenu)
-    [":save", save] -> do
-      saved <- liftAff $ saveGame save (Playing state)
-      playing state []
-    [":c"] -> do 
-      log $ show state.character
-      playing state []
-    ["talk"] -> do
-      liftEngine $ dialogue state testDialogue 1
-    ["look"] -> do
-      let (Location loc) = state.location
-      log $ loc.description <> "\n"
-      playing state []
-    [] -> do
+playing :: PlayingState -> PlayerAction -> Engine GameState
+playing state action = do
+  case action of
+
+    Idle -> do 
       input' <- prompt
-      let command = (split (wrap " ")) input'
-      playing state command
+      case runParser expressionParser input' of 
+        Left error -> do 
+          liftEffect $ Console.log $ show error
+          log "I dont understand that command."
+          playing state Idle
+        Right (Tuple action' _) -> do
+          case action' of 
+            Save saveName -> do
+              saved <- liftAff $ saveGame saveName (Playing state)
+              log "Game saved."
+              playing state Idle
+            Load saveName -> do 
+              loadedState <- liftAff $ loadGame saveName
+              pure loadedState
+            Exit -> do
+              pure (MainMenu)
+            (Action playerAction) -> do
+              playing state playerAction
+
+    Look -> do
+      case state of 
+        Exploration exploringState -> do 
+          let (Location loc) = exploringState.location
+          log $ loc.description <> "\n"
+          playing state Idle
+        _ -> do
+          playing state Idle
+
     _ -> do
-      pure (Playing state)
+      log "I dont understand that command."
+      playing state Idle
+  -- case input of
+  --   ["help"] -> do
+  --     log ":save savename     -- Save a game by its name"
+  --     log ":exit              -- Exit to main menu"
+  --     log ":c                 -- Inspect character \n"
+  --     playing state []
+  --   [":exit"] -> do
+  --     pure (MainMenu)
+  --   [":save", save] -> do
+  --     saved <- liftAff $ saveGame save (Playing state)
+  --     playing state []
+  --   [":c"] -> do 
+  --     log $ show state.character
+  --     playing state []
+  --   ["talk"] -> do
+  --     liftEngine $ dialogue state testDialogue 1
+  --   ["look"] -> do
+  --     let (Location loc) = state.location
+  --     log $ loc.description <> "\n"
+  --     playing state []
+  --   [] -> do
+  --     input' <- prompt
+  --     let command = (split (wrap " ")) input'
+  --     playing state command
+  --   _ -> do
 
 
 testDialogue :: Dialogue

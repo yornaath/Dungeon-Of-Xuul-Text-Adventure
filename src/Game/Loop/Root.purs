@@ -7,6 +7,7 @@ import Game.GameState (GameState(..))
 import Game.Loop.CharacterCreation (characterCreation)
 import Game.Loop.MainMenu (mainMenu)
 import Game.Loop.Playing.PlayingLoop (playing)
+import Game.Syntax.Spec (PlayerAction(..))
 
 gameLoop :: GameState -> Engine GameState
 gameLoop state = do
@@ -18,7 +19,7 @@ gameLoop state = do
       newState <- characterCreation state' []
       pure newState
     (Playing state') -> do
-      newState <- playing state' []
+      newState <- playing state' Idle
       pure newState
   
       
