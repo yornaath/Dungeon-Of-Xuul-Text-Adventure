@@ -17,7 +17,7 @@ import Game.Data.Dialogue (Dialogue)
 import Game.Data.Location (Location(..))
 import Game.Engine (Engine, liftEngine, log, prompt)
 import Game.GameState (GameState(..))
-import Game.Loop.Playing.PlayingState (PlayingState(..))
+import Game.Loop.Playing.PlayingState (PlayingState(..), getCharacter)
 import Game.Syntax.Parser (expressionParser)
 import Game.Syntax.Spec (Expression(..), PlayerAction(..))
 import Lib.Parser (runParser)
@@ -55,6 +55,10 @@ playing state action = do
           playing state Idle
         _ -> do
           playing state Idle
+
+    OpenCharacterSheet -> do
+      log $ show $ getCharacter state
+      playing state Idle
 
     _ -> do
       log "I dont understand that command."

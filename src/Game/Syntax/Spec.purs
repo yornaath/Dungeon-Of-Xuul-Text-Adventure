@@ -28,6 +28,7 @@ data PlayerAction
   | Take String
   | TakeItemFrom String String
   | Consume String
+  | OpenCharacterSheet
   | Combat CombatTurn
   | Dialogue DialogueTurn
 

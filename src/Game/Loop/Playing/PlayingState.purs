@@ -28,6 +28,13 @@ data PlayingState
   | Combat CombatState
   | Dialogue DialogueState
 
+getCharacter :: PlayingState -> CharacterSheet
+getCharacter state =
+  case state of 
+    Exploration s -> s.character
+    Combat s -> s.character
+    Dialogue s -> s.character
+
 derive instance genericPlayingState:: Generic PlayingState _
 
 instance showPlayingState :: Show PlayingState where

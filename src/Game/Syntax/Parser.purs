@@ -21,7 +21,7 @@ expressionParser
 load :: Parser Expression
 load = do
   _ <- anySpace
-  _ <- literal "load"
+  _ <- literal ":load"
   _ <- someSpace
   saveGame <- finiteString
   pure (Load saveGame)
@@ -29,7 +29,7 @@ load = do
 save :: Parser Expression
 save = do
   _ <- anySpace
-  _ <- literal "save"
+  _ <- literal ":save"
   _ <- someSpace
   saveGame <- finiteString
   pure (Save saveGame)
@@ -54,6 +54,7 @@ actionParser
   <|> look
   <|> consume 
   <|> take 
+  <|> openCharacterSheet
   <|> (Combat <$> combatParser) 
   <|> (Dialogue <$> dialogueParser)
 
@@ -72,6 +73,13 @@ look = do
 
 take :: Parser PlayerAction
 take = takeItemFrom <|> takeItem
+
+openCharacterSheet :: Parser PlayerAction
+openCharacterSheet = do
+  _ <- anySpace
+  _ <- literal ":c" <|> literal "char" <|> literal "character"
+  _ <- anySpace
+  pure $ OpenCharacterSheet
 
 consume :: Parser PlayerAction
 consume = do
