@@ -33,11 +33,9 @@ main = HA.runHalogenAff do
     initialGameState :: GameState
     initialGameState = MainMenu
 
-  c <- loadGame "blytz"
-
   body <- HA.awaitBody
   
-  halogenIO <- runUI (gameComponent environment c) unit body
+  halogenIO <- runUI (gameComponent environment initialGameState) unit body
 
   void $ forkAff $ do
     let 
@@ -46,7 +44,7 @@ main = HA.runHalogenAff do
         newState <- runEngine environment (gameLoop currentState)
         _ <- halogenIO.query $ H.tell $ GameTurn newState
         gameLoopRunner newState
-    gameLoopRunner c
+    gameLoopRunner initialGameState
   
   void $ forkAff $ do
     liftEffect $ Q.on log \line -> do

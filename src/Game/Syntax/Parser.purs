@@ -38,7 +38,7 @@ exit :: Parser Expression
 exit = do
   _ <- anySpace
   _ <- literal ":exit"
-  _ <- someSpace
+  _ <- anySpace
   saveGame <- finiteString
   pure Exit
 

@@ -2,6 +2,7 @@ module Game.Engine where
   
 import Prelude
 
+import Components.Utils (css)
 import Control.Monad.RWS (asks)
 import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either(..))
@@ -12,6 +13,7 @@ import Effect.Aff (Aff, makeAff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Engine.Environment (Environment)
+import Halogen.HTML as HH
 import Queue as Q
 import Type.Equality (class TypeEquals, from)
 
@@ -44,7 +46,7 @@ instance engineEngineM :: EngineM Engine where
 
   log str = do
     logQueue <- asks _.log
-    let lines = ( split (Pattern "\n") str)
+    let lines = (\line' -> HH.div [css "logline whitespace-pre"]  [HH.text line']) <$> (split (Pattern "\n") str)
     liftEffect $ for_ lines (Q.put logQueue)
     pure unit
 

@@ -1,13 +1,8 @@
 module Game.Loop.Playing.PlayingLoop where
 
-import Game.Loop.Playing.Dialogue.DialogueLoop
-import Prelude
-
 import Data.Either (Either(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (wrap)
-import Data.String (split)
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
@@ -15,18 +10,19 @@ import Effect.Console as Console
 import Engine.SaveGames (saveGame, loadGame)
 import Game.Data.Dialogue (Dialogue)
 import Game.Data.Location (Location(..))
-import Game.Engine (Engine, liftEngine, log, prompt)
+import Game.Engine (Engine, log, prompt)
 import Game.GameState (GameState(..))
 import Game.Loop.Playing.PlayingState (ExplorationState, PlayingState(..))
 import Game.Syntax.Parser (expressionParser)
 import Game.Syntax.Spec (Expression(..), PlayerAction(..))
 import Lib.Parser (runParser)
+import Prelude (bind, discard, pure, show, ($), (<>))
 
 playing :: PlayingState -> PlayerAction -> Engine GameState
 playing state action = do
   case state of 
     Exploration exploringState -> do 
-      explorationLoop exploringState action
+      explorationLoop exploringState (Look)
     CombatMode _ -> do
         log "[Combat not yet supported]"
         playing state Idle

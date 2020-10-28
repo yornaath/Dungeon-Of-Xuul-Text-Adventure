@@ -14,6 +14,8 @@ import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff, Milliseconds(..), makeAff)
+import Effect.Aff.Class (liftAff)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (log, logShow)
 import Effect.Now (now)
 import Game.GameState (GameState)
@@ -71,9 +73,21 @@ saveGame save currentState = makeAff \cb -> do
   w <- window
   storage <- localStorage w
   saved <- setItem save gameStateString storage
-  --saved <- try $ FS.writeTextFile UTF8 (Path.concat [__dirname, "../../.saves", save <> ".json"]) gameStateString
+  _ <- setItem "lastsave" save storage
   cb (Right currentState)
   mempty
+
+continue :: Aff (Either String GameState)
+continue = do
+  w <- liftEffect $ window
+  storage <- liftEffect $ localStorage w
+  lastSave <- liftEffect $ getItem "lastsave" storage
+  case lastSave of 
+    Just lastSave' -> do
+      state <- liftAff $ loadGame lastSave'
+      pure (Right state)
+    Nothing -> do
+      pure (Left "eror")
 
 -- module Engine.SaveGames where
 

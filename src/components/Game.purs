@@ -2,16 +2,15 @@ module Components.Game where
 
 import Prelude
 
-import Components.Test as Test
 import Components.Utils (css)
 import Data.Argonaut.Core as AC
 import Data.Array (index, reverse)
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Class.Console (log)
 import Engine.Environment (Environment)
 import Game.GameState (GameState, gameStateToJson)
 import Halogen as H
+import Halogen.HTML (fromPlainHTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
@@ -21,7 +20,7 @@ import Web.UIEvent.KeyboardEvent (code, ctrlKey)
 type State = {
   currentInput :: String,
   game :: GameState,
-  log :: Array String,
+  log :: Array (HH.HTML Void Void),
   history :: Array String,
   historyIndex:: Int
 }
@@ -37,7 +36,7 @@ data Action a =
 
 data GameQuery a = 
     GameTurn GameState a
-  | Log String a
+  | Log (HH.HTML Void Void) a
 
 data GameOutput = Noop_
 
@@ -65,16 +64,14 @@ gameComponent environment initialGameState =
   render state =
     HH.div [css "container mx-auto px-4 pt-4"]
       [
-        -- --HH.button [ HE.onClick \e -> Just ( Roll (d20 : Nil ))] [ HH.text "roll" ],
-        -- HH.slot _dieselector 1 dieSelector {} (Just <<< OnSelectedDie),
-        -- HH.button [ HE.onClick (\e -> Just (Roll)) ] [ HH.text "roll" ],
-        -- HH.div_ [ HH.text $ show state ]
+       
         HH.div [css "console"] [
 
-            HH.div [css "log"] $ (\logLine -> HH.div [css "logline whitespace-pre"] [HH.text logLine] ) <$> reverse state.log,
+            HH.div [css "log"] $ fromPlainHTML <$> (reverse state.log),
             
             HH.input [
               css "prompt",
+              HP.autofocus true,
               HP.value state.currentInput,
               HE.onValueInput \str -> Just (Typing str),
               HE.onKeyUp \e -> do 
