@@ -3,16 +3,16 @@ module Game.Loop.Playing.Dialogue.DialogueLoop where
 import Prelude
 
 import Data.Array (foldl, mapWithIndex)
+import Data.Tuple (Tuple(..))
 import Data.Array as A
 import Game.Data.Character (CharacterSheet(..))
-import Game.Data.Dialogue (Dialogue, Reply, ChoicePoint)
 import Data.Int (fromString)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
 import Game.Engine (Engine, log, prompt)
 import Game.GameState (GameState(..))
 import Game.Loop.Playing.PlayingState (PlayingState)
+import Game.Data.Dialogue (Dialogue, Reply, ChoicePoint)
 
 -- dialogue :: PlayingState -> Dialogue -> Int -> Engine GameState
 -- dialogue state dialogue' index = do

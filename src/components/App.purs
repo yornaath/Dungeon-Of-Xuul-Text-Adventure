@@ -7,7 +7,7 @@ import Components.Utils (css)
 import Game.Data.Die (sumDies, tossDies)
 import Data.List (List(..))
 import Data.Maybe (Maybe(..), fromMaybe)
-import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class (class MonadEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
