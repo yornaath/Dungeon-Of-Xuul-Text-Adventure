@@ -3,7 +3,8 @@ module Game.Data.Character.Inventory (
   Equiped,
   GearSlot(..),
   InventoryItem,
-  equip
+  equip,
+  equippedStats
 ) where
 
 import Prelude
@@ -101,6 +102,16 @@ equip'' OffHand item equiped = case item of
   Dagger item' -> do
     let 
       equiped' = setItemInSlot OffHand equiped (Dagger item')
+      mainHand = M.lookup MainHand equiped'
+      Tuple unslottedItem equiped'' = case mainHand of 
+        Just (GreatSword a) -> unEquipSlot MainHand equiped
+        Just (Bow a) -> unEquipSlot MainHand equiped
+        Just (Staff a) -> unEquipSlot MainHand equiped
+        _ -> Tuple Nothing equiped'
+    Right $ Tuple equiped'' Nothing
+  Shield item' -> do
+    let 
+      equiped' = setItemInSlot OffHand equiped (Shield item')
       mainHand = M.lookup MainHand equiped'
       Tuple unslottedItem equiped'' = case mainHand of 
         Just (GreatSword a) -> unEquipSlot MainHand equiped

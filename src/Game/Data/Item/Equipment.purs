@@ -24,6 +24,7 @@ data Equipment =
   | Dagger WeaponProps
   | Bow WeaponProps
   | Staff WeaponProps
+  | Shield ShieldProps
 
 type EquipmentProps = {
   name :: String,
@@ -38,6 +39,14 @@ type WeaponProps = {
   stats :: Stats,
   levelRequirement :: Level,
   damage :: Int
+}
+
+type ShieldProps = {
+  name :: String,
+  description :: String,
+  stats :: Stats,
+  levelRequirement :: Level,
+  block :: Int
 }
 
 derive instance genericEquipment:: Generic Equipment _
@@ -67,6 +76,7 @@ levelRequirementOf item =
     Dagger weapon' -> weapon'.levelRequirement
     Bow weapon' -> weapon'.levelRequirement
     Staff weapon' -> weapon'.levelRequirement
+    Shield shield' -> shield'.levelRequirement
 
 statsOf :: Equipment -> Stats
 statsOf item = 
@@ -81,4 +91,5 @@ statsOf item =
     Dagger weapon' -> weapon'.stats
     Bow weapon' -> weapon'.stats
     Staff weapon' -> weapon'.stats
+    Shield shield' -> shield'.stats
 
