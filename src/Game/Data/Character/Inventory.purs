@@ -34,16 +34,6 @@ type Inventory = {
   carrying :: Array InventoryItem
 }
 
-takeEquipmentFromInventory :: Equipment -> Inventory -> Either String (Tuple Equipment (Array InventoryItem))
-takeEquipmentFromInventory equipment inventory = 
-  let itemIndex = findIndex ((==) (InventoryEquipment equipment)) inventory.carrying
-  in case itemIndex of 
-    Nothing -> Left "Equipment not found in inventory"
-    Just index -> do
-      let carrying = inventory.carrying
-      let carryingWithItemRemoved = fromMaybe carrying (deleteAt index carrying )
-      Right $ Tuple equipment carryingWithItemRemoved
-
 equip :: GearSlot -> Equipment -> Inventory -> Either String Inventory
 equip slot equipment inventory = do 
   (Tuple takenItem carrying) <- takeEquipmentFromInventory equipment inventory
@@ -53,6 +43,16 @@ equip slot equipment inventory = do
       Nothing -> carrying
       Just item' -> snoc carrying $ InventoryEquipment item'
   pure { equiped, carrying: carrying' }
+
+takeEquipmentFromInventory :: Equipment -> Inventory -> Either String (Tuple Equipment (Array InventoryItem))
+takeEquipmentFromInventory equipment inventory = 
+  let itemIndex = findIndex ((==) (InventoryEquipment equipment)) inventory.carrying
+  in case itemIndex of 
+    Nothing -> Left "Equipment not found in inventory"
+    Just index -> do
+      let carrying = inventory.carrying
+      let carryingWithItemRemoved = fromMaybe carrying (deleteAt index carrying )
+      Right $ Tuple equipment carryingWithItemRemoved
 
 equip'' :: GearSlot -> Equipment -> Equiped -> Either String (Tuple Equiped (Maybe Equipment)) 
 equip'' Head (Helmet item) equiped = 
@@ -111,7 +111,7 @@ equip'' OffHand item equiped = case item of
   _ -> do
       Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
-equip'' _ _ _ = Left "Could not perform that action"
+equip'' _ _ _ = Left "Could not perform that inventory action."
 
 --
 -- InventoryItem
