@@ -2,7 +2,7 @@ module Game.Data.Character.Inventory (
   Inventory,
   Equiped,
   GearSlot(..),
-  InventoryItem,
+  InventoryItem(..),
   equip,
   equippedStats
 ) where
@@ -22,6 +22,8 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
+import Effect.Class (liftEffect)
+import Effect.Class.Console (logShow)
 import Game.Data.Item.Equipment (Equipment(..), statsOf)
 import Game.Data.Stats (Stats)
 
@@ -35,15 +37,91 @@ type Inventory = {
   carrying :: Array InventoryItem
 }
 
+
 equip :: GearSlot -> Equipment -> Inventory -> Either String Inventory
 equip slot equipment inventory = do 
   (Tuple takenItem carrying) <- takeEquipmentFromInventory equipment inventory
-  (Tuple equiped returnedItem) <- equip'' slot equipment inventory.equiped
+  (Tuple equiped unslottedItem) <- equip'' slot equipment inventory.equiped
   let 
-    carrying' = case returnedItem of
+    carrying' = case unslottedItem of
       Nothing -> carrying
-      Just item' -> snoc carrying $ InventoryEquipment item'
-  pure { equiped, carrying: carrying' }
+      Just item' -> snoc carrying (InventoryEquipment item')
+  pure { equiped: equiped, carrying: carrying' }
+
+equip'' :: GearSlot -> Equipment -> Equiped -> Either String (Tuple Equiped (Maybe Equipment)) 
+equip'' Head (Helmet item) equiped = do
+  let unslottedItem = unEquipSlot Head equiped
+  Right $ Tuple (setItemInSlot Head equiped (Helmet item)) unslottedItem
+equip'' Chest (ChestPlate item) equiped = do
+  let unslottedItem = unEquipSlot Chest equiped
+  Right $ Tuple (setItemInSlot Chest equiped (ChestPlate item)) unslottedItem
+equip'' Hands (Gloves item) equiped = do
+  let unslottedItem = unEquipSlot Hands equiped
+  Right $ Tuple (setItemInSlot Hands equiped (Gloves item)) unslottedItem
+equip'' Leggs (LeggGuards item) equiped = do
+  let unslottedItem = unEquipSlot Leggs equiped
+  Right $ Tuple (setItemInSlot Leggs equiped (LeggGuards item)) unslottedItem
+equip'' Feet (Shoes item) equiped = do
+  let unslottedItem = unEquipSlot Feet equiped
+  Right $ Tuple (setItemInSlot Feet equiped (Shoes item)) unslottedItem
+
+equip'' MainHand item equiped = 
+  case item of 
+    LongSword item' -> do
+      Right $ Tuple (setItemInSlot MainHand equiped (LongSword item')) Nothing
+    GreatSword item' -> do
+      let 
+        equiped' = setItemInSlot MainHand equiped item
+        unslottedItem = unEquipSlot OffHand equiped'
+      Right $ Tuple equiped' unslottedItem
+    Dagger item' -> do
+      Right $ Tuple (setItemInSlot MainHand equiped item) Nothing
+    Bow item' -> do
+      let equiped' = setItemInSlot MainHand equiped item
+      let unslottedItem  = unEquipSlot OffHand equiped'
+      Right $ Tuple equiped' unslottedItem
+    Staff item' -> do
+      let equiped' = setItemInSlot MainHand equiped item
+      let unslottedItem  = unEquipSlot OffHand equiped'
+      Right $ Tuple equiped' unslottedItem
+    _ -> do
+      Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
+
+equip'' OffHand item equiped = case item of 
+  LongSword item' -> do
+    let 
+      equiped' = setItemInSlot OffHand equiped (LongSword item')
+      mainHand = M.lookup MainHand equiped'
+      unslottedItem = case mainHand of 
+        Just (GreatSword a) -> unEquipSlot MainHand equiped
+        Just (Bow a) -> unEquipSlot MainHand equiped
+        Just (Staff a) -> unEquipSlot MainHand equiped
+        _ -> Nothing
+    Right $ Tuple equiped' unslottedItem
+  Dagger item' -> do
+    let 
+      equiped' = setItemInSlot OffHand equiped (Dagger item')
+      mainHand = M.lookup MainHand equiped'
+      unslottedItem = case mainHand of 
+        Just (GreatSword a) -> unEquipSlot MainHand equiped
+        Just (Bow a) -> unEquipSlot MainHand equiped
+        Just (Staff a) -> unEquipSlot MainHand equiped
+        _ -> Nothing
+    Right $ Tuple equiped' unslottedItem
+  Shield item' -> do
+    let 
+      equiped' = setItemInSlot OffHand equiped (Shield item')
+      mainHand = M.lookup MainHand equiped'
+      unslottedItem = case mainHand of 
+        Just (GreatSword a) -> unEquipSlot MainHand equiped
+        Just (Bow a) -> unEquipSlot MainHand equiped
+        Just (Staff a) -> unEquipSlot MainHand equiped
+        _ -> Nothing
+    Right $ Tuple equiped' unslottedItem
+  _ -> do
+      Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
+
+equip'' _ _ _ = Left "Could not perform that inventory action."
 
 takeEquipmentFromInventory :: Equipment -> Inventory -> Either String (Tuple Equipment (Array InventoryItem))
 takeEquipmentFromInventory equipment inventory = 
@@ -55,74 +133,6 @@ takeEquipmentFromInventory equipment inventory =
       let carryingWithItemRemoved = fromMaybe carrying (deleteAt index carrying )
       Right $ Tuple equipment carryingWithItemRemoved
 
-equip'' :: GearSlot -> Equipment -> Equiped -> Either String (Tuple Equiped (Maybe Equipment)) 
-equip'' Head (Helmet item) equiped = 
-  Right $ Tuple (setItemInSlot Head equiped (Helmet item)) Nothing
-equip'' Chest (ChestPlate item) equiped = 
-  Right $ Tuple (setItemInSlot Chest equiped (ChestPlate item)) Nothing
-equip'' Hands (Gloves item) equiped = 
-  Right $ Tuple (setItemInSlot Hands equiped (Gloves item)) Nothing
-equip'' Leggs (LeggGuards item) equiped = 
-  Right $ Tuple (setItemInSlot Leggs equiped (LeggGuards item)) Nothing
-equip'' Feet (Shoes item) equiped = 
-  Right $ Tuple (setItemInSlot Feet equiped (Shoes item)) Nothing
-
-equip'' MainHand item equiped = 
-  case item of 
-    LongSword item' -> do
-      Right $ Tuple (setItemInSlot MainHand equiped (LongSword item')) Nothing
-    GreatSword item' -> do
-      let equiped' = setItemInSlot MainHand equiped (GreatSword item')
-      let Tuple unslottedItem equiped'' = unEquipSlot OffHand equiped'
-      Right $ Tuple equiped'' unslottedItem
-    Dagger item' -> do
-      Right $ Tuple (setItemInSlot MainHand equiped (Dagger item')) Nothing
-    Bow item' -> do
-      let equiped' = setItemInSlot MainHand equiped (Bow item')
-      let Tuple unslottedItem equiped'' = unEquipSlot OffHand equiped'
-      Right $ Tuple equiped'' unslottedItem
-    Staff item' -> do
-      let equiped' = setItemInSlot MainHand equiped (Staff item')
-      let Tuple unslottedItem equiped'' = unEquipSlot OffHand equiped'
-      Right $ Tuple equiped'' unslottedItem
-    _ -> do
-      Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
-
-equip'' OffHand item equiped = case item of 
-  LongSword item' -> do
-    let 
-      equiped' = setItemInSlot OffHand equiped (LongSword item')
-      mainHand = M.lookup MainHand equiped'
-      Tuple unslottedItem equiped'' = case mainHand of 
-        Just (GreatSword a) -> unEquipSlot MainHand equiped
-        Just (Bow a) -> unEquipSlot MainHand equiped
-        Just (Staff a) -> unEquipSlot MainHand equiped
-        _ -> Tuple Nothing equiped'
-    Right $ Tuple equiped'' Nothing
-  Dagger item' -> do
-    let 
-      equiped' = setItemInSlot OffHand equiped (Dagger item')
-      mainHand = M.lookup MainHand equiped'
-      Tuple unslottedItem equiped'' = case mainHand of 
-        Just (GreatSword a) -> unEquipSlot MainHand equiped
-        Just (Bow a) -> unEquipSlot MainHand equiped
-        Just (Staff a) -> unEquipSlot MainHand equiped
-        _ -> Tuple Nothing equiped'
-    Right $ Tuple equiped'' Nothing
-  Shield item' -> do
-    let 
-      equiped' = setItemInSlot OffHand equiped (Shield item')
-      mainHand = M.lookup MainHand equiped'
-      Tuple unslottedItem equiped'' = case mainHand of 
-        Just (GreatSword a) -> unEquipSlot MainHand equiped
-        Just (Bow a) -> unEquipSlot MainHand equiped
-        Just (Staff a) -> unEquipSlot MainHand equiped
-        _ -> Tuple Nothing equiped'
-    Right $ Tuple equiped'' Nothing
-  _ -> do
-      Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
-
-equip'' _ _ _ = Left "Could not perform that inventory action."
 
 --
 -- InventoryItem
@@ -156,13 +166,11 @@ instance decodeJsonInventoryItem :: DecodeJson InventoryItem where
 type Equiped = M.Map GearSlot Equipment
 
 setItemInSlot :: GearSlot -> Equiped -> Equipment -> Equiped
-setItemInSlot slot' equiped equipmentConstructor = 
-  M.update (\_ -> Just (equipmentConstructor)) slot' equiped
+setItemInSlot slot equiped equipment = 
+  M.update (\_ -> Just equipment) slot equiped
 
-unEquipSlot :: GearSlot -> Equiped -> Tuple (Maybe Equipment) Equiped
-unEquipSlot slot' equiped = Tuple unequipedItem newEquipment where
-  unequipedItem = M.lookup slot' equiped
-  newEquipment = M.update (\_ -> Nothing) slot' equiped
+unEquipSlot :: GearSlot -> Equiped -> Maybe Equipment
+unEquipSlot slot equiped = M.lookup slot equiped
 
 equippedStats :: Equiped -> Array Stats
 equippedStats equiped = (\i -> statsOf i) <$> equipedItems where
