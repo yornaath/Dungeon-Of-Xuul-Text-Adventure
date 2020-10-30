@@ -40,39 +40,39 @@ type Inventory = {
 
 equip :: GearSlot -> Equipment -> Inventory -> Either String Inventory
 equip slot equipment inventory = do 
-  (Tuple takenItem carrying) <- takeEquipmentFromInventory equipment inventory
-  (Tuple equiped unslottedItem) <- equip'' slot equipment inventory.equiped
+  Tuple takenItem carrying <- takeEquipmentFromInventory equipment inventory
+  Tuple equiped unslottedItem <- _equip slot equipment inventory.equiped
   let 
     carrying' = case unslottedItem of
       Nothing -> carrying
       Just item' -> snoc carrying (InventoryEquipment item')
-  pure { equiped: equiped, carrying: carrying' }
+  pure { equiped, carrying: carrying' }
 
-equip'' :: GearSlot -> Equipment -> Equiped -> Either String (Tuple Equiped (Maybe Equipment)) 
-equip'' Head (Helmet item) equiped = do
+_equip :: GearSlot -> Equipment -> Equiped -> Either String (Tuple Equiped (Maybe Equipment)) 
+_equip Head (Helmet item) equiped = do
   let unslottedItem = unEquipSlot Head equiped
   Right $ Tuple (setItemInSlot Head equiped (Helmet item)) unslottedItem
-equip'' Chest (ChestPlate item) equiped = do
+_equip Chest (ChestPlate item) equiped = do
   let unslottedItem = unEquipSlot Chest equiped
   Right $ Tuple (setItemInSlot Chest equiped (ChestPlate item)) unslottedItem
-equip'' Hands (Gloves item) equiped = do
+_equip Hands (Gloves item) equiped = do
   let unslottedItem = unEquipSlot Hands equiped
   Right $ Tuple (setItemInSlot Hands equiped (Gloves item)) unslottedItem
-equip'' Leggs (LeggGuards item) equiped = do
+_equip Leggs (LeggGuards item) equiped = do
   let unslottedItem = unEquipSlot Leggs equiped
   Right $ Tuple (setItemInSlot Leggs equiped (LeggGuards item)) unslottedItem
-equip'' Feet (Shoes item) equiped = do
+_equip Feet (Shoes item) equiped = do
   let unslottedItem = unEquipSlot Feet equiped
   Right $ Tuple (setItemInSlot Feet equiped (Shoes item)) unslottedItem
 
-equip'' MainHand item equiped = 
+_equip MainHand item equiped = 
   case item of 
     LongSword item' -> do
-      Right $ Tuple (setItemInSlot MainHand equiped (LongSword item')) Nothing
+      Right $ Tuple (setItemInSlot MainHand equiped item) Nothing
     GreatSword item' -> do
       let 
         equiped' = setItemInSlot MainHand equiped item
-        unslottedItem = unEquipSlot OffHand equiped'
+        unslottedItem = unEquipSlot OffHand equiped
       Right $ Tuple equiped' unslottedItem
     Dagger item' -> do
       Right $ Tuple (setItemInSlot MainHand equiped item) Nothing
@@ -87,7 +87,7 @@ equip'' MainHand item equiped =
     _ -> do
       Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
-equip'' OffHand item equiped = case item of 
+_equip OffHand item equiped = case item of 
   LongSword item' -> do
     let 
       equiped' = setItemInSlot OffHand equiped (LongSword item')
@@ -121,7 +121,7 @@ equip'' OffHand item equiped = case item of
   _ -> do
       Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
-equip'' _ _ _ = Left "Could not perform that inventory action."
+_equip _ _ _ = Left "Could not perform that inventory action."
 
 takeEquipmentFromInventory :: Equipment -> Inventory -> Either String (Tuple Equipment (Array InventoryItem))
 takeEquipmentFromInventory equipment inventory = 
