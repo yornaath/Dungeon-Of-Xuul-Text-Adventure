@@ -15,11 +15,13 @@ You can edit this file as you like.
   , "node-fs"
   , "node-readline"
   , "ordered-collections"
+  , "profunctor-lenses"
   , "psci-support"
   , "queue"
   , "random"
   , "test-unit"
   , "unicode"
+  , "validation"
   , "yargs"
   , "zeta"
   ]

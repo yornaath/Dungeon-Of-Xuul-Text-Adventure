@@ -12,11 +12,11 @@ import Data.Generic.Rep.Show (genericShow)
 import Game.Data.Character (CharacterSheet)
 import Game.Data.Location (Location)
 
-type GlobalGameState l = {
+type GlobalGameState a = {
   turn :: Int,
   character :: CharacterSheet,
   location :: Location
-  | l
+  | a
 }
 
 type ExplorationState = GlobalGameState ()

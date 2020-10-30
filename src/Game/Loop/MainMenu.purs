@@ -46,7 +46,7 @@ mainMenuChoices state input = do
             Right saveState -> do 
               case saveState of 
                 Playing playingState -> do
-                  let (CharacterSheet character) = getCharacter playingState
+                  let character = getCharacter playingState
                   log $ "Continue game character: " <> character.name <> " \n"
                   pure saveState
                 _ -> do 
