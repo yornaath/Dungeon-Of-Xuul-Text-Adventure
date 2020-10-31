@@ -6,7 +6,7 @@ import Data.Int (floor, toNumber)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Game.Data.Character.Inventory (GearSlot(..), Inventory, equippedStats)
+import Game.Data.Character.Inventory (GearSlot(..), Inventory, equipedFromFoldable, equippedStats)
 import Game.Data.Experience (Experience, Level(..), levelofExperience)
 import Game.Data.Item.Equipment (Equipment(..), levelRequirementOf)
 import Game.Data.Role (Role)
@@ -57,7 +57,7 @@ mkCharacterSheet name role stats xp =
     sheet = {
       name, role, stats, xp, hp: 0,
       inventory: {
-        equiped: M.fromFoldable [
+        equiped: equipedFromFoldable [
           Tuple Head $ Helmet { name: "Howler", description: "Nasty looking thing", stats: mkStats 2 4 0 0 0, levelRequirement: Level 0}
         ],
         carrying: []

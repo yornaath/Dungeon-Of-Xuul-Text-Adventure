@@ -4,28 +4,25 @@ module Game.Data.Character.Inventory (
   GearSlot(..),
   InventoryItem(..),
   equip,
-  equippedStats
+  equippedStats,
+  equipedFromFoldable
 ) where
 
 import Prelude
 
-import Control.Monad.Trans.Class (lift)
 import Data.Argonaut.Decode (class DecodeJson)
 import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
-import Data.Array (deleteAt, findIndex, fromFoldable, snoc)
+import Data.Array (deleteAt, findIndex, snoc)
 import Data.Either (Either(..))
+import Data.Foldable (class Foldable, foldl)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Eq (genericEq)
 import Data.Generic.Rep.Ord (genericCompare)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Map as M
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
-import Effect.Class (liftEffect)
-import Effect.Class.Console (logShow)
-import Effect.Console (log)
 import Game.Data.Item.Equipment (Equipment(..), statsOf)
 import Game.Data.Stats (Stats, emptyStats)
 
@@ -74,18 +71,18 @@ _equip MainHand item equiped =
     GreatSword item' -> do
       let 
         equiped' = setItemInSlot MainHand equiped item
-        unslottedItem = getInSlot OffHand equiped'
-      Right $ Tuple equiped' unslottedItem
+        Tuple unslottedItem equiped'' = unslot OffHand equiped'
+      Right $ Tuple equiped'' unslottedItem
     Dagger item' -> do
       Right $ Tuple (setItemInSlot MainHand equiped item) Nothing
     Bow item' -> do
       let equiped' = setItemInSlot MainHand equiped item
-      let unslottedItem  = getInSlot OffHand equiped'
-      Right $ Tuple equiped' unslottedItem
+      let Tuple unslottedItem equiped''  = unslot OffHand equiped'
+      Right $ Tuple equiped'' unslottedItem
     Staff item' -> do
       let equiped' = setItemInSlot MainHand equiped item
-      let unslottedItem  = getInSlot OffHand equiped'
-      Right $ Tuple equiped' unslottedItem
+      let Tuple unslottedItem equiped''  = unslot OffHand equiped'
+      Right $ Tuple equiped'' unslottedItem
     _ -> do
       Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
@@ -94,32 +91,32 @@ _equip OffHand item equiped = case item of
     let 
       equiped' = setItemInSlot OffHand equiped (LongSword item')
       mainHand = getInSlot MainHand equiped
-      unslottedItem = case mainHand of 
-        Just (GreatSword a) -> getInSlot MainHand equiped
-        Just (Bow a) -> getInSlot MainHand equiped
-        Just (Staff a) -> getInSlot MainHand equiped
-        _ -> Nothing
-    Right $ Tuple equiped' unslottedItem
+      Tuple unslottedItem equiped'' = case mainHand of 
+        Just (GreatSword a) -> unslot MainHand equiped'
+        Just (Bow a) -> unslot MainHand equiped'
+        Just (Staff a) -> unslot MainHand equiped'
+        _ -> Tuple Nothing equiped'
+    Right $ Tuple equiped'' unslottedItem
   Dagger item' -> do
     let 
       equiped' = setItemInSlot OffHand equiped (Dagger item')
       mainHand = getInSlot MainHand equiped'
-      unslottedItem = case mainHand of 
-        Just (GreatSword a) -> getInSlot MainHand equiped
-        Just (Bow a) -> getInSlot MainHand equiped
-        Just (Staff a) -> getInSlot MainHand equiped
-        _ -> Nothing
-    Right $ Tuple equiped' unslottedItem
+      Tuple unslottedItem equiped'' = case mainHand of 
+        Just (GreatSword a) -> unslot MainHand equiped'
+        Just (Bow a) -> unslot MainHand equiped'
+        Just (Staff a) -> unslot MainHand equiped'
+        _ -> Tuple Nothing equiped'
+    Right $ Tuple equiped'' unslottedItem
   Shield item' -> do
     let 
       equiped' = setItemInSlot OffHand equiped (Shield item')
       mainHand = getInSlot MainHand equiped'
-      unslottedItem = case mainHand of 
-        Just (GreatSword a) -> getInSlot MainHand equiped
-        Just (Bow a) -> getInSlot MainHand equiped
-        Just (Staff a) -> getInSlot MainHand equiped
-        _ -> Nothing
-    Right $ Tuple equiped' unslottedItem
+      Tuple unslottedItem equiped'' = case mainHand of 
+        Just (GreatSword a) -> unslot MainHand equiped'
+        Just (Bow a) -> unslot MainHand equiped'
+        Just (Staff a) -> unslot MainHand equiped'
+        _ -> Tuple Nothing equiped'
+    Right $ Tuple equiped'' unslottedItem
   _ -> do
       Left $ "Cannot equip " <> show item <> " in slot: " <> show MainHand
 
@@ -175,6 +172,11 @@ type Equiped = {
   offHand :: Maybe Equipment
 }
 
+equipedFromFoldable :: forall f. Foldable f => f (Tuple GearSlot Equipment) -> Equiped
+equipedFromFoldable slots = foldl f empty slots where
+  empty = { head: Nothing, chest: Nothing, hands: Nothing, leggs: Nothing, feet: Nothing, mainHand: Nothing, offHand: Nothing}
+  f = (\equiped (Tuple slot item) -> setItemInSlot slot equiped item)
+
 setItemInSlot :: GearSlot -> Equiped -> Equipment -> Equiped
 setItemInSlot slot equiped equipment = case slot of 
   Head -> equiped { head = Just equipment }
@@ -194,6 +196,16 @@ getInSlot slot equiped = case slot of
   Feet -> equiped.feet
   MainHand -> equiped.mainHand
   OffHand  -> equiped.offHand
+
+unslot :: GearSlot -> Equiped -> Tuple (Maybe Equipment) Equiped
+unslot slot equiped = case slot of 
+  Head -> Tuple equiped.head equiped { head = Nothing }
+  Chest -> Tuple equiped.chest equiped { chest = Nothing }
+  Hands -> Tuple equiped.hands equiped { hands = Nothing }
+  Leggs -> Tuple equiped.leggs equiped { leggs = Nothing }
+  Feet -> Tuple equiped.feet equiped { feet = Nothing }
+  MainHand -> Tuple equiped.mainHand equiped { mainHand = Nothing }
+  OffHand  -> Tuple equiped.offHand equiped { offHand = Nothing }
 
 equippedStats :: Equiped -> Array Stats
 equippedStats equiped =
