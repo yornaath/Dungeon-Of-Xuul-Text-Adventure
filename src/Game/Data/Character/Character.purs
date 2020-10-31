@@ -10,7 +10,7 @@ import Game.Data.Character.Inventory (GearSlot(..), Inventory, equippedStats)
 import Game.Data.Experience (Experience, Level(..), levelofExperience)
 import Game.Data.Item.Equipment (Equipment(..), levelRequirementOf)
 import Game.Data.Role (Role)
-import Game.Data.Stats (Endurance(..), Stats(..), mkStats, total)
+import Game.Data.Stats (Endurance(..), Stat(..), Stats(..), mkStats, total)
 
 type CharacterSheet =
   { name        :: String,
@@ -75,7 +75,7 @@ maxhp characterSheet =
     (Stats stats) = sheet'.stats
     (Level l) = level characterSheet
     (Stats totalStats) = totalStats characterSheet
-    (Endurance end) = totalStats.end
+    (Stat end) = totalStats.end
     hp' = (10 * l) * floor ((toNumber end) * 1.5)
   in
     hp'

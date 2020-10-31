@@ -26,28 +26,18 @@ data Equipment =
   | Staff WeaponProps
   | Shield ShieldProps
 
-type EquipmentProps = {
-  name :: String,
-  description :: String,
-  stats :: Stats,
-  levelRequirement :: Level
-}
+type BaseProps =
+  ( name :: String
+  , description :: String
+  , stats :: Stats
+  , levelRequirement :: Level 
+  )
+ 
+type EquipmentProps = { | BaseProps }
 
-type WeaponProps = {
-  name :: String,
-  description :: String,
-  stats :: Stats,
-  levelRequirement :: Level,
-  damage :: Int
-}
-
-type ShieldProps = {
-  name :: String,
-  description :: String,
-  stats :: Stats,
-  levelRequirement :: Level,
-  block :: Int
-}
+type WeaponProps = { damage :: Int | BaseProps } 
+  
+type ShieldProps = { block :: Int | BaseProps } 
 
 derive instance genericEquipment:: Generic Equipment _
 
