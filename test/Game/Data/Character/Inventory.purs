@@ -4,9 +4,9 @@ import Prelude
 
 import Control.Monad.Free (Free)
 import Data.Either (Either(..))
-import Data.Map as M
 import Data.Tuple (Tuple(..))
-import Game.Data.Character.Inventory (GearSlot(..), Inventory, InventoryItem(..), equip, equipedFromFoldable)
+import Game.Data.Character.Inventory (Inventory, InventoryItem(..), equip)
+import Game.Data.Character.Inventory.Equiped (GearSlot(..), equipedFromFoldable)
 import Game.Data.Experience (Level(..))
 import Game.Data.Item.Equipment (Equipment(..))
 import Game.Data.Stats (emptyStats, mkStats)
