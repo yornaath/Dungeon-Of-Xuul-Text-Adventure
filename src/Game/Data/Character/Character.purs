@@ -3,15 +3,13 @@ module Game.Data.Character where
 import Prelude
 
 import Data.Int (floor, toNumber)
-import Data.Map as M
-import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Game.Data.Character.Inventory (Inventory)
 import Game.Data.Character.Inventory.Equiped (GearSlot(..), equipedFromFoldable, equippedStats)
 import Game.Data.Experience (Experience, Level(..), levelofExperience)
 import Game.Data.Item.Equipment (Equipment(..), levelRequirementOf)
 import Game.Data.Role (Role)
-import Game.Data.Stats (Endurance(..), Stat(..), Stats(..), mkStats, total)
+import Game.Data.Stats (Stat(..), Stats(..), mkStats, total)
 
 type CharacterSheet =
   { name        :: String,
@@ -73,11 +71,10 @@ maxhp :: CharacterSheet -> Int
 maxhp characterSheet = 
   let
     sheet' = characterSheet
-    (Stats stats) = sheet'.stats
-    (Level l) = level characterSheet
+    (Level level) = level characterSheet
     (Stats totalStats) = totalStats characterSheet
-    (Stat end) = totalStats.end
-    hp' = (10 * l) * floor ((toNumber end) * 1.5)
+    (Stat endurance) = totalStats.end
+    hp' = (10 * level) * floor ((toNumber endurance) * 1.5)
   in
     hp'
 

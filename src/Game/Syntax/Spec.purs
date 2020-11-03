@@ -30,6 +30,7 @@ data PlayerAction
   | Consume String
   | OpenCharacterSheet
   | Combat CombatTurn
+  | TalkTo String
   | Dialogue DialogueTurn
 
 derive instance genericPlayerAction:: Generic PlayerAction _
@@ -56,7 +57,7 @@ instance eqCombatTurn :: Eq CombatTurn where
 
 
 data DialogueTurn =
-  Answer String 
+  Answer Int 
 
 derive instance genericDialogueTurn:: Generic DialogueTurn _
 

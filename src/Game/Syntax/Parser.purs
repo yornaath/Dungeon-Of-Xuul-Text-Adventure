@@ -5,7 +5,7 @@ import Prelude
 import Control.Alt ((<|>))
 import Data.Traversable (sequence)
 import Game.Syntax.Spec (CombatTurn(..), DialogueTurn(..), Expression(..), PlayerAction(..))
-import Lib.Parser (Parser, anySpace, finiteString, literal, someSpace)
+import Lib.Parser (Parser, anySpace, finiteString, literal, nat, someSpace)
 
 --
 -- Root level Expression parser
@@ -52,6 +52,7 @@ actionParser :: Parser PlayerAction
 actionParser 
   =   move
   <|> look
+  <|> talkTo
   <|> consume 
   <|> take 
   <|> openCharacterSheet
@@ -70,6 +71,14 @@ look = do
   _ <- literal "look"
   _ <- anySpace
   pure $ Look
+
+talkTo :: Parser PlayerAction
+talkTo = do
+  _ <- anySpace
+  _ <- literal "talk"
+  _ <- anySpace
+  characterName <- finiteString
+  pure $ TalkTo characterName
 
 take :: Parser PlayerAction
 take = takeItemFrom <|> takeItem
@@ -149,7 +158,6 @@ dialogueParser = answer
 answer :: Parser DialogueTurn
 answer = do
   _ <- anySpace
-  _ <- literal "answer:"
-  _ <- someSpace
-  answer' <- finiteString
-  pure $ Answer answer'
+  answerN <- nat
+  _ <- anySpace
+  pure $ Answer answerN

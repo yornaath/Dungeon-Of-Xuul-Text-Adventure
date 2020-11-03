@@ -3,13 +3,15 @@ module Lib.Parser where
 import Prelude
 
 import Control.Alt (class Alt)
-import Control.Alternative (class Alternative)
+import Control.Alternative (class Alternative, empty)
 import Control.Lazy (class Lazy)
 import Control.Plus (class Plus)
 import Data.Array (foldl, fromFoldable, toUnfoldable)
-import Data.Char.Unicode (isSpace)
+import Data.Char.Unicode (isDigit, isSpace)
 import Data.Either (Either(..))
+import Data.Int (fromString)
 import Data.List (List(..), many, (:), some)
+import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (fromCharArray, toCharArray)
 import Data.Tuple (Tuple(..))
 
@@ -86,6 +88,9 @@ ternary pred = do
 char :: Char -> Parser Char
 char x = ternary ((==) x)
 
+digit :: Parser Char
+digit = ternary isDigit
+
 literal :: String -> Parser String
 literal s = 
   fromChars <$> case toChars s of 
@@ -109,6 +114,13 @@ someSpace :: Parser String
 someSpace = do
   spaces' <- some $ ternary isSpace
   pure $ fromChars spaces'
+
+nat :: Parser Int
+nat = do
+  xs <- some digit
+  case fromString $ fromChars xs of
+    Just n -> pure n
+    Nothing -> empty
 
 -- optional :: forall a. Parser a -> Parser a
 -- optional try = Parser \s -> case runParser try s of 
