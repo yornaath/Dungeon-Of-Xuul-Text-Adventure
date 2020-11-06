@@ -48,9 +48,11 @@ explorationLoop state action =
       log $ loc.description <> "\n"
       explorationLoop state Idle
     
-    TalkTo _ -> do
+    TalkTo character -> do
+      -- is character in room?`
+      -- Have the characters talked before?
       state' <- dialogueLoop state testDialogue 1
-      explorationLoop state Idle
+      explorationLoop state' Idle
 
     OpenCharacterSheet -> do
       log $ show $ state.character
