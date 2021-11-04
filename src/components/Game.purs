@@ -25,6 +25,7 @@ type State = {
   historyIndex:: Int
 }
 
+data Action :: forall k. k -> Type
 data Action a = 
     Init
   | Noop
