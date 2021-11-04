@@ -8569,7 +8569,7 @@ var PS = {};
                           });
                       });
                   };
-                  throw new Error("Failed pattern match at Components.Game (line 99, column 17 - line 106, column 23): " + [ v.constructor.name ]);
+                  throw new Error("Failed pattern match at Components.Game (line 100, column 17 - line 107, column 23): " + [ v.constructor.name ]);
               };
               var handleAction = function (v) {
                   if (v instanceof Init) {
@@ -8677,7 +8677,7 @@ var PS = {};
                           });
                       });
                   };
-                  throw new Error("Failed pattern match at Components.Game (line 108, column 18 - line 142, column 16): " + [ v.constructor.name ]);
+                  throw new Error("Failed pattern match at Components.Game (line 109, column 18 - line 143, column 16): " + [ v.constructor.name ]);
               };
               return Halogen_Component.mkComponent({
                   initialState: initialState,
