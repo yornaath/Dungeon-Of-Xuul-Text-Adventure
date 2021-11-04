@@ -3,8 +3,9 @@ module Main where
 import Prelude
 
 import Components.Game (GameQuery(..), gameComponent)
+import Data.Int (toNumber)
 import Effect (Effect)
-import Effect.Aff (Aff, forkAff, launchAff)
+import Effect.Aff (Aff, Milliseconds(..), delay, forkAff, launchAff)
 import Engine.Environment (Environment)
 import Engine.Input as EngineInput
 import Engine.Log as EngineLog
@@ -42,6 +43,7 @@ main = HA.runHalogenAff do
       gameLoopRunner :: GameState -> Aff Unit
       gameLoopRunner currentState = do
         newState <- runEngine environment (gameLoop currentState)
+        _ <- delay (Milliseconds $ toNumber 33)
         _ <- halogenIO.query $ H.mkTell $ GameTurn newState
         gameLoopRunner newState
     gameLoopRunner initialGameState
