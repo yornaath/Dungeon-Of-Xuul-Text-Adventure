@@ -8,6 +8,7 @@ import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Engine.SaveGames (saveGame, loadGame)
+import Game.Data.Character (showCharacter)
 import Game.Data.Dialogue (Dialogue)
 import Game.Data.Location (Location(..))
 import Game.Engine (Engine, log, prompt)
@@ -55,7 +56,7 @@ explorationLoop state action =
       explorationLoop state' Idle
 
     OpenCharacterSheet -> do
-      log $ show $ state.character
+      log $ showCharacter state.character
       explorationLoop state Idle
 
     _ -> do
