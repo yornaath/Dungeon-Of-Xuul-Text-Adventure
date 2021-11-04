@@ -42,14 +42,14 @@ main = HA.runHalogenAff do
       gameLoopRunner :: GameState -> Aff Unit
       gameLoopRunner currentState = do
         newState <- runEngine environment (gameLoop currentState)
-        _ <- halogenIO.query $ H.tell $ GameTurn newState
+        _ <- halogenIO.query $ H.mkTell $ GameTurn newState
         gameLoopRunner newState
     gameLoopRunner initialGameState
   
   void $ forkAff $ do
     liftEffect $ Q.on log \line -> do
       _ <- launchAff $ do 
-        _ <- halogenIO.query $ H.tell $ Log line
+        _ <- halogenIO.query $ H.mkTell $ Log line
         pure unit
       pure unit
     

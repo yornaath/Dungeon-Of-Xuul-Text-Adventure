@@ -6,14 +6,20 @@ import Control.Alt (class Alt)
 import Control.Alternative (class Alternative, empty)
 import Control.Lazy (class Lazy)
 import Control.Plus (class Plus)
-import Data.Array (foldl, fromFoldable, toUnfoldable)
-import Data.Char.Unicode (isDigit, isSpace)
-import Data.Either (Either(..))
+import Data.String as Str
+import Data.Array (fromFoldable, toUnfoldable)
+import Data.String.Regex as Re
+import Data.String.Regex.Flags as ReF
+import Data.Either (Either(..), fromRight)
 import Data.Int (fromString)
-import Data.List (List(..), many, (:), some)
+import Data.List (List(..), many, (:), some, foldl)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (fromCharArray, toCharArray)
 import Data.Tuple (Tuple(..))
+import Partial.Unsafe (unsafePartial)
+
+foreign import isDigitImpl :: Char -> Boolean
+foreign import isSpaceImpl :: Char -> Boolean
 
 data Parser a = Parser (String -> Either ParserError (Tuple a String))
 
@@ -64,6 +70,12 @@ instance alternativeParser :: (Alt Parser, Plus Parser) => Alternative Parser
 instance lazyParser :: Lazy (Parser (List a)) where
   defer f = Parser \s -> runParser (f unit) s
 
+isSpace :: Char -> Boolean
+isSpace = isSpaceImpl
+
+isDigit :: Char -> Boolean
+isDigit = isDigitImpl
+
 toChars :: String -> List Char
 toChars = toCharArray >>> toUnfoldable
 
@@ -89,7 +101,7 @@ char :: Char -> Parser Char
 char x = ternary ((==) x)
 
 digit :: Parser Char
-digit = ternary isDigit
+digit = ternary isDigitImpl
 
 literal :: String -> Parser String
 literal s = 

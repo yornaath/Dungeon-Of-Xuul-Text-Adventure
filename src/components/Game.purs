@@ -40,7 +40,7 @@ data GameQuery a =
 
 data GameOutput = Noop_
 
-gameComponent :: forall input cm. MonadEffect cm => Environment -> GameState -> H.Component HH.HTML GameQuery input GameOutput cm
+gameComponent :: forall input cm. MonadEffect cm => Environment -> GameState -> H.Component GameQuery input GameOutput cm
 gameComponent environment initialGameState =
   H.mkComponent
     { initialState
@@ -73,18 +73,18 @@ gameComponent environment initialGameState =
               css "prompt",
               HP.autofocus true,
               HP.value state.currentInput,
-              HE.onValueInput \str -> Just (Typing str),
+              HE.onValueInput \str -> (Typing str),
               HE.onKeyUp \e -> do 
                 let 
                   ctrl = ctrlKey e 
                   keyCode = code e
                 case keyCode of 
-                  "Enter" -> Just Return
-                  "ArrowUp" -> Just HistoryUp
-                  "ArrowDown" -> Just HistoryDown
-                  "KeyC" -> if ctrl then Just Clear else Just Noop
-                  "Escape" -> Just Clear
-                  _ -> Just Noop
+                  "Enter" -> Return
+                  "ArrowUp" -> HistoryUp
+                  "ArrowDown" -> HistoryDown
+                  "KeyC" -> if ctrl then Clear else Noop
+                  "Escape" -> Clear
+                  _ -> Noop
             ]
 
         ],

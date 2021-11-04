@@ -3,12 +3,12 @@ module Game.Data.Location where
 import Prelude
 
 import Data.Argonaut.Decode.Class (class DecodeJson)
-import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode.Class (class EncodeJson)
-import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Eq (genericEq)
-import Data.Generic.Rep.Show (genericShow)
+import Data.Argonaut.Encode.Generic (genericEncodeJson)
+import Data.Argonaut.Decode.Generic (genericDecodeJson)
+import Data.Eq.Generic (genericEq)
+import Data.Show.Generic (genericShow)
 import Data.List (List)
 
 data Location = Location {

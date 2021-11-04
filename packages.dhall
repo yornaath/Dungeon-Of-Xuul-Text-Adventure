@@ -104,8 +104,21 @@ in  upstream
       }
 -------------------------------
 -}
-
 let upstream =
-      https://github.com/purescript/package-sets/releases/download/psc-0.13.8-20200922/packages.dhall sha256:5edc9af74593eab8834d7e324e5868a3d258bbab75c5531d2eb770d4324a2900
+      https://github.com/purescript/package-sets/releases/download/psc-0.14.4-20211030/packages.dhall sha256:5cd7c5696feea3d3f84505d311348b9e90a76c4ce3684930a0ff29606d2d816c
 
 in  upstream
+    -- with purescript-eulalie.repo = "https://github.com/bodil/purescript-eulalie.git"
+    -- with purescript-eulalie.version = "e046dfbc4b87f2c9c981151258201b7503ce7d95"
+    -- with purescript-eulalie.dependencies = [
+    --     "globals",
+    --     "integers",
+    --     "foldable-traversable",
+    --     "monoid",
+    --     "tuples",
+    --     "control",
+    --     "sets",
+    --     "maybe",
+    --     "strings",
+    --     "prelude"
+    -- ]

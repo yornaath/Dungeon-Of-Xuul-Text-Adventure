@@ -5,9 +5,9 @@ import Prelude
 import Data.Argonaut.Core (Json)
 import Data.Argonaut.Core as AC
 import Data.Argonaut.Decode (class DecodeJson, JsonDecodeError, decodeJson)
-import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson, encodeJson)
-import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
+import Data.Argonaut.Encode.Generic (genericEncodeJson)
+import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Argonaut.Parser (jsonParser)
 import Data.DateTime.Instant (unInstant)
 import Data.Either (Either(..))

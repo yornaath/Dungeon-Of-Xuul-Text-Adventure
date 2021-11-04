@@ -20,7 +20,7 @@ data Action =
 
 type Slots = ( dieselector :: DieSelectorSlot Int )
 
-appComponent :: forall query input output cm. MonadEffect cm => H.Component HH.HTML query input output cm
+appComponent :: forall query input output cm. MonadEffect cm => H.Component query input output cm
 appComponent =
   H.mkComponent
     { initialState
@@ -35,15 +35,15 @@ appComponent =
     HH.div [css "container mx-auto px-4 pt-4"]
       [
         --HH.button [ HE.onClick \e -> Just ( Roll (d20 : Nil ))] [ HH.text "roll" ],
-        HH.slot _dieselector 1 dieSelector {} (Just <<< OnSelectedDie),
-        HH.button [ HE.onClick (\e -> Just (Roll)) ] [ HH.text "roll" ],
+        HH.slot _dieselector 1 dieSelector {} (OnSelectedDie),
+        HH.button [ HE.onClick (\e -> Roll) ] [ HH.text "roll" ],
         HH.div_ [ HH.text $ show state ]
       ]
 
   handleAction = case _ of
     Roll -> do
-      selectedDiesQuery <- H.query _dieselector 1 $ H.request GetSelected
-      let dies = fromMaybe Nil selectedDiesQuery
+      selectedDiesQuery <- H.mkRequest GetSelected
+      let dies = selectedDiesQuery
       let tossed = tossDies dies
       sum <- H.liftEffect (sumDies tossed)
       H.modify_ \_ -> sum

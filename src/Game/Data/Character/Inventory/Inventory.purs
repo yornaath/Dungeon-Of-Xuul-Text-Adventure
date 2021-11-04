@@ -7,14 +7,14 @@ module Game.Data.Character.Inventory (
 import Prelude
 
 import Data.Argonaut.Decode (class DecodeJson)
-import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson)
-import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
 import Data.Array (deleteAt, findIndex, snoc)
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Eq (genericEq)
-import Data.Generic.Rep.Show (genericShow)
+import Data.Argonaut.Encode.Generic (genericEncodeJson)
+import Data.Argonaut.Decode.Generic (genericDecodeJson)
+import Data.Eq.Generic (genericEq)
+import Data.Show.Generic (genericShow)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Game.Data.Character.Inventory.Equiped (Equiped, GearSlot(..), getInSlot, setItemInSlot, unslot)

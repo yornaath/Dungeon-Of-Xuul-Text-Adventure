@@ -7,7 +7,7 @@ import Data.Array (fromFoldable)
 import Game.Data.Die (Die, allDies)
 import Data.List (List(..), delete, snoc)
 import Data.Maybe (Maybe(..))
-import Data.Symbol (SProxy(..))
+import Type.Proxy
 import Effect.Class (class MonadEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -15,7 +15,7 @@ import Halogen.HTML.Events as HE
 
 type DieSelectorSlot = H.Slot DieSelectorQuery DieSelectorOutput
 
-_dieselector = SProxy :: SProxy "dieselector"
+_dieselector = Proxy :: Proxy "dieselector"
 
 type DieSelectorState = {
   selected :: List Die
@@ -30,7 +30,7 @@ type DieSelectorOutput = List Die
 data DieSelectorQuery a = 
   GetSelected ((List Die) -> a)
 
-dieSelector :: forall input cm. MonadEffect cm => H.Component HH.HTML DieSelectorQuery input DieSelectorOutput cm
+dieSelector :: forall input cm. MonadEffect cm => H.Component DieSelectorQuery input DieSelectorOutput cm
 dieSelector =
   H.mkComponent
     { initialState
@@ -47,9 +47,9 @@ dieSelector =
         HH.div [ ] (map (\d ->
           HH.div [ css "flex" ] 
             [
-              HH.button [ css "p-1" , HE.onClick (\e -> Just (Select d)) ] [ HH.text "+" ],
+              HH.button [ css "p-1" , HE.onClick (\e -> (Select d)) ] [ HH.text "+" ],
               HH.div [css "p-1"] [ HH.text $ show d ],
-              HH.button [ css "p-1", HE.onClick (\e -> Just (Deselect d)) ] [ HH.text "-" ]
+              HH.button [ css "p-1", HE.onClick (\e -> (Deselect d)) ] [ HH.text "-" ]
             ]
         ) (fromFoldable allDies))
         ,

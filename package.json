@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "ensure-purs-version": "install-purescript --purs-ver"
+  },
+  "dependencies": {
+    "purescript": "^0.14.5",
+    "purescript-installer": "^0.2.5"
+  }
+}
